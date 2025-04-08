@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Input } from "../ui/Input/Input";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"
 
 import {useMutation} from "@tanstack/react-query"
+import { AuthContext } from "../../contexts/authContext";
 
 export function Login() {
+  const {setCustomer, setIsAuth,} = useContext(AuthContext)
 
   const [customerDetails, setCustomerDetails] = useState({});
   const navigate = useNavigate()
@@ -21,7 +23,9 @@ export function Login() {
     mutationKey:["login"],
     mutationFn: async(customerDetails) => await axios.post("customers/login", customerDetails),
     onSuccess: (data) => {
-      console.log(data.data);
+      console.log(data.data.data);
+      setCustomer(data.data.data)
+      setIsAuth(true)
       alert(data.data.message);
       navigate("/dashboard")
     }
