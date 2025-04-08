@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Input } from "../ui/Input/Input";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios"
+
+import {useMutation} from "@tanstack/react-query"
 
 export function Login() {
 
@@ -14,13 +17,20 @@ export function Login() {
     });
   };
 
-  const login = async(data) => {
-
-  }
+  const {mutate: login} = useMutation({
+    mutationKey:["login"],
+    mutationFn: async(customerDetails) => await axios.post("customers/login", customerDetails),
+    onSuccess: (data) => {
+      console.log(data.data);
+      alert(data.data.message);
+      navigate("/dashboard")
+    }
+  })
 
   const  handleSubmit = async(e) => {
     e.preventDefault()
-    navigate("/dashboard")
+    console.log(customerDetails)
+    login(customerDetails)
     
   } 
   
@@ -38,8 +48,8 @@ export function Login() {
             <Input
               type={"email"}
               placeholder={"Email *"}
-              name={"customerEmail"}
-              id={"customerEmail"}
+              name={"customer_email"}
+              id={"customer_email"}
               onChange={handelChange}
             />
           </div>
@@ -48,8 +58,8 @@ export function Login() {
             <Input
               type={"password"}
               placeholder={"Password *"}
-              name={"customerPassword"}
-              id={"customerPassword"}
+              name={"customer_password"}
+              id={"customer_password"}
               onChange={handelChange}
             />
           </div>

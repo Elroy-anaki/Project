@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Input } from "../ui/Input/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 export function SingUp() {
   const [customerDetails, setCustomerDetails] = useState({});
   const [msg, setMsg] = useState("");
+  const navigate = useNavigate();
 
   const handelChange = (e) => {
     setCustomerDetails((prev) => {
@@ -12,7 +15,13 @@ export function SingUp() {
     });
   };
 
-  const signUp = async (data) => {};
+  const { mutate: signUp } = useMutation({
+    mutationKey: ["signUp"],
+    mutationFn: async (customerDetails) =>
+      await axios.post("customers/sign-up", customerDetails),
+    onSuccess: (data) => navigate("/login"),
+    onError: (error) => setMsg("Something Get Wrong!"),
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +33,7 @@ export function SingUp() {
       return;
     }
     console.log(customerDetails);
-    // send to the server
+    signUp(customerDetails);
   };
 
   return (
@@ -40,28 +49,29 @@ export function SingUp() {
             </div>
             <div>
               <Input
-                type={"email"}
-                placeholder={"Email *"}
-                name={"customerEmail"}
-                id={"customerEmail"}
+                type={"text"}
+                placeholder={"Full Name *"}
+                name={"customer_name"}
+                id={"customer_name"}
                 onChange={handelChange}
               />
             </div>
             <div>
               <Input
-                type={"text"}
-                placeholder={"Full Name *"}
-                name={"customerName"}
-                id={"customerName"}
+                type={"email"}
+                placeholder={"Email *"}
+                name={"customer_email"}
+                id={"customer_email"}
                 onChange={handelChange}
               />
             </div>
+
             <div>
               <Input
                 type={"password"}
                 placeholder={"Password *"}
-                name={"customerPassword"}
-                id={"customerPassword"}
+                name={"customer_password"}
+                id={"customer_password"}
                 onChange={handelChange}
               />
             </div>
@@ -69,8 +79,8 @@ export function SingUp() {
               <Input
                 type={"password"}
                 placeholder={"Confirm Password *"}
-                name={"customerConfirmPassword"}
-                id={"customerConfirmPassword"}
+                name={"customer_confirm_password"}
+                id={"customer_confirm_password"}
                 onChange={handelChange}
               />
             </div>
