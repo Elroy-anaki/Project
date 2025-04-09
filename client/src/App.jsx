@@ -1,3 +1,4 @@
+import { AddDeviceCustomer } from "./components/AddDeviceCustomer/AddDeviceCustomer";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { Login } from "./components/Login/Login";
 import { SingUp } from "./components/SignUp/SingUp";
@@ -13,6 +14,8 @@ function Root() {
       </header>
       <main className="bg-gray-100 h-[90vh]">
         <Outlet />
+
+        <AddDeviceCustomer />
       </main>
     </>
   );

@@ -7,7 +7,14 @@ function Dashboard() {
       <div className="mx-8">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold ">Choose a Device</h3>
-        <button className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg">Add New Device +</button>
+        <button
+        className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
+        onClick={() =>
+          document.getElementById("add-device-customer").showModal()
+        }
+      >
+       Add New Device +
+      </button>
 
       </div>
         <Table />
