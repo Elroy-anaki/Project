@@ -11,3 +11,11 @@ class DeviceCustomer(Base):
     customer_id = Column(Integer, ForeignKey("Customers.id"))
 
     customer = relationship("Customer", back_populates="devices")
+
+    def to_json(self):
+        return {
+            "serial_number": self.serial_number,
+            "device_name": self.device_name,
+            "device_features": self.device_features,
+            "customer_id": self.customer_id,
+        }
