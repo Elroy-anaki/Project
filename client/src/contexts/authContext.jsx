@@ -6,7 +6,6 @@ import axios from "axios";
 
 
 
-const CLIENT_ID = "941180979275-pn53d30kqqqrnf8uqgorcbvrrfqvdfrr.apps.googleusercontent.com"
 
 export const AuthContext = createContext()
 
@@ -15,7 +14,7 @@ function AuthProvider({ children }) {
     const [isAuth, setIsAuth] = useState(false)
     const [customer, setCustomer] = useState(null)
 
-    const { data} = useQuery({
+    const { data } = useQuery({
         queryKey: ['verifyToken'],
         queryFn: async () => {
             try {

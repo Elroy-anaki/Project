@@ -16,3 +16,12 @@ class DeviceCustomerController:
             
         except Exception as e:
             raise e
+    async def get_devices_by_customer_id(self, request: Request,response: Response):
+        try:
+            customer_id = request.path_params["customer_id"]
+            devices_customer = await self.device_customer_service.get_devices_by_customer_id(customer_id)
+            return JSONResponse(content= {"succes": True, "data": devices_customer}, status_code= 201)
+            
+        except Exception as e:
+            raise e
+

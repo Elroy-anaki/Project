@@ -1,12 +1,15 @@
 import React, { useContext, useState } from "react";
 import Form from "./Form";
-import { useMutation } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { AuthContext } from "../../contexts/authContext";
+
 
 export function AddDeviceCustomer() {
   const [deviceCustomerDetails, setDeviceCustomerDetails] = useState({});
   const {customer} = useContext(AuthContext)
+  const queryClient = useQueryClient();
+
 
   const handelChange = (e) => {
     setDeviceCustomerDetails((prev) => {
@@ -17,7 +20,13 @@ export function AddDeviceCustomer() {
   const { mutate: createDeviceCustomer } = useMutation({
     mutationKey: ["createDeviceCustomer"],
     mutationFn: async (data) => await axios.post("device-customers/", data),
-    onSuccess: () => alert("Added succefully!"),
+    onSuccess: () => {
+
+      alert("Added succefully!")
+      queryClient.invalidateQueries({queryKey: ["getDevicesCustomers"]})
+    
+      
+    },
     onError: () => alert("Something get wrong..."),
   });
 

@@ -17,4 +17,17 @@ class DeviceCustomerDal:
             self.db.refresh(new_device_customer)
             return new_device_customer.to_json()
         except Exception as e:
+            print("error", e)
+            raise e
+        
+    async def get_devices_by_customer_id(self, customer_id: int):
+        try:
+            devices = (
+                self.db.query(DeviceCustomer)
+                .filter(DeviceCustomer.customer_id == customer_id)
+                .all()
+            )
+            return [device.to_json() for device in devices]
+        except Exception as e:
+            print("error", e)
             raise e

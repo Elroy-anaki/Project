@@ -26,7 +26,6 @@ export function Login() {
       console.log(data.data.data);
       setCustomer(data.data.data)
       setIsAuth(true)
-      alert(data.data.message);
       navigate("/dashboard")
     }
   })

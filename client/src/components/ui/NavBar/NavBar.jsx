@@ -12,6 +12,11 @@ export function NavBar() {
             <p className="text-white text-xl font-bold">CalibraPro</p>
           </Link>
         </li>
+        <li>
+          <Link to="/dashboard">
+            <p className="text-white text-xl font-bold">Dashboard</p>
+          </Link>
+        </li>
         <div className="flex justify-between items-center gap-5">
           {customer ? (
             <>

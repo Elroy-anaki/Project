@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { AddDeviceCustomer } from "./components/AddDeviceCustomer/AddDeviceCustomer";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { Login } from "./components/Login/Login";
@@ -5,6 +6,7 @@ import { SingUp } from "./components/SignUp/SingUp";
 import { NavBar } from "./components/ui/NavBar/NavBar";
 import { Home } from "./pages/Home/Home";
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, Outlet } from "react-router-dom";
+import { AuthContext } from "./contexts/authContext";
 
 function Root() {
   return (
@@ -22,6 +24,7 @@ function Root() {
 }
 
 function App() {
+  const {isAuth} = useContext(AuthContext)
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
@@ -30,7 +33,7 @@ function App() {
           <Route path="home" element={<Home />} />
           <Route path="sign-up" element={<SingUp />} />
           <Route path="login" element={<Login />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={isAuth ? <Dashboard />: <Login />} />
         </Route>
       </>
     )
