@@ -3,19 +3,17 @@ import { Table } from "../Table/Table";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { AuthContext } from "../../contexts/authContext";
+import { AddMeasurementContext } from "../../contexts/addMeasurementContext";
 
 function Dashboard() {
   const { customer } = useContext(AuthContext);
-  // const [devices, setDevices] = useState([])
-
+  const {setSerialNumber} = useContext(AddMeasurementContext)
   const { data: devices, isLoading } = useQuery({
     queryKey: ["getDevicesCustomers"],
     queryFn: async () => {
       const { data } = await axios.get(
         `/device-customers/${customer.id}/customer`
       );
-      console.log(data.data);
-      // setDevices(data.data);
       return data.data;
     },
   });
@@ -55,11 +53,21 @@ function Dashboard() {
       {
         header: "Action",
         accessorKey: null,
-        cell: () => (
-          <button className="text-cyan-700 font-medium cursor-pointer bg-white rounded-lg border-2 border-cyan-700 px-2 py-1 hover:bg-cyan-600 hover:text-white">
-            View
-          </button>
-        ),
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <button
+              onClick={() => {
+                setSerialNumber(row.serialNumber);
+                alert(row.serialNumber)
+                document.getElementById("add-measurement").showModal();
+              }}
+              className="text-cyan-700 font-medium cursor-pointer bg-white rounded-lg border-2 border-cyan-700 px-2 py-1 hover:bg-cyan-600 hover:text-white"
+            >
+              View
+            </button>
+          );
+        },
       },
     ],
     []

@@ -7,6 +7,7 @@ import { NavBar } from "./components/ui/NavBar/NavBar";
 import { Home } from "./pages/Home/Home";
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, Outlet } from "react-router-dom";
 import { AuthContext } from "./contexts/authContext";
+import AddMeasurement from "./components/AddMeasurement/AddMeasurement";
 
 function Root() {
   return (
@@ -18,6 +19,7 @@ function Root() {
         <Outlet />
 
         <AddDeviceCustomer />
+        <AddMeasurement />
       </main>
     </>
   );
