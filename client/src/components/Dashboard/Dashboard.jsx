@@ -6,8 +6,10 @@ import { AuthContext } from "../../contexts/authContext";
 import { AddMeasurementContext } from "../../contexts/addMeasurementContext";
 
 function Dashboard() {
+
   const { customer } = useContext(AuthContext);
-  const {setSerialNumber} = useContext(AddMeasurementContext)
+  const {setSerialNumber} = useContext(AddMeasurementContext);
+
   const { data: devices, isLoading } = useQuery({
     queryKey: ["getDevicesCustomers"],
     queryFn: async () => {
@@ -59,7 +61,6 @@ function Dashboard() {
             <button
               onClick={() => {
                 setSerialNumber(row.serialNumber);
-                alert(row.serialNumber)
                 document.getElementById("add-measurement").showModal();
               }}
               className="text-cyan-700 font-medium cursor-pointer bg-white rounded-lg border-2 border-cyan-700 px-2 py-1 hover:bg-cyan-600 hover:text-white"

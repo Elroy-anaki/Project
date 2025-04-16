@@ -17,4 +17,15 @@ class MeasurementDal:
         except Exception as e:
             self.db.rollback()
             raise e
+    def get_all_measurement_by_serial_number(self, serial_number):
+        try:
+            measurements = (
+                self.db.query(Measurement)
+                .filter(Measurement.serial_number == serial_number)
+                .all()
+            )
+            return [m.to_json() for m in measurements]
+        except Exception as e:
+            raise e
+            
     
