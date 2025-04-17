@@ -15,7 +15,7 @@ function Root() {
       <header className="h-[10vh] bg-gray-100">
         <NavBar />
       </header>
-      <main className="bg-gray-100 h-[90vh]">
+      <main className="bg-gray-100 min-h-[90vh]">
         <Outlet />
 
         <AddDeviceCustomer />

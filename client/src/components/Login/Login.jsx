@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Input } from "../ui/Input/Input";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"
@@ -7,7 +7,7 @@ import {useMutation} from "@tanstack/react-query"
 import { AuthContext } from "../../contexts/authContext";
 
 export function Login() {
-  const {setCustomer, setIsAuth,} = useContext(AuthContext)
+  const {setCustomer, setIsAuth, isAuth} = useContext(AuthContext)
 
   const [customerDetails, setCustomerDetails] = useState({});
   const navigate = useNavigate()
@@ -36,6 +36,10 @@ export function Login() {
     login(customerDetails)
     
   } 
+  useEffect(() => {
+    if(!isAuth) return
+    navigate("/dashboard")
+  }, [isAuth])
   
 
   return (

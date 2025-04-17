@@ -41,6 +41,8 @@ function AuthProvider({ children }) {
     onError: (error) => console.log(error),
   });
 
+ 
+
   const authGlobalState = {
     customer,
     isAuth,
