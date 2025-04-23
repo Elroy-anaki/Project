@@ -27,5 +27,19 @@ class MeasurementDal:
             return [m.to_json() for m in measurements]
         except Exception as e:
             raise e
+        
+    def get_all_input_values_by_serial_number(self, serial_number):
+        try:
+            input_values = (
+                self.db.query(Measurement.input_value)
+                .filter(Measurement.serial_number == serial_number)
+                .all()
+                
+            )
+            
+            print(input_values)
+            return [float(row[0]) for row in input_values]
+        except Exception as e:
+            raise e
             
     

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useMemo } from "react";
-import { AddMeasurementContext } from "../../contexts/addMeasurementContext";
+import { SharedContext } from "../../contexts/sharedContext";
 import Form from "./Form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -9,7 +9,7 @@ import { Table } from "../Table/Table";
 function AddMeasurement() {
   const [addMeasurementDetails, setAddMeasurementDetails] = useState({});
   const [measurements, setMeasurements] = useState([]);
-  const { serialNumber } = useContext(AddMeasurementContext);
+  const { serialNumber } = useContext(SharedContext);
 
   const queryClient = useQueryClient();
 

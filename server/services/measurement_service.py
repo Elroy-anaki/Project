@@ -20,3 +20,9 @@ class MeasurementService:
             return measurements
         except Exception as e:
             raise e
+    async def get_all_input_values_by_serial_number(self, serial_number):
+        try:
+            measurements = self.measurement_dal.get_all_input_values_by_serial_number(serial_number=serial_number)
+            return measurements
+        except Exception as e:
+            raise e

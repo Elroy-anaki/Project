@@ -3,12 +3,11 @@ import { Table } from "../Table/Table";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { AuthContext } from "../../contexts/authContext";
-import { AddMeasurementContext } from "../../contexts/addMeasurementContext";
+import { SharedContext } from "../../contexts/sharedContext";
 
 function Dashboard() {
-
   const { customer } = useContext(AuthContext);
-  const {setSerialNumber} = useContext(AddMeasurementContext);
+  const { setSerialNumber, getAllInputValuesBySerialNumber } = useContext(SharedContext);
 
   const { data: devices, isLoading } = useQuery({
     queryKey: ["getDevicesCustomers"],
@@ -58,18 +57,58 @@ function Dashboard() {
         cell: (info) => {
           const row = info.row.original;
           return (
-            <button
-              onClick={() => {
-                setSerialNumber(row.serialNumber);
-                document.getElementById("add-measurement").showModal();
-              }}
-              className="text-cyan-700 font-medium cursor-pointer bg-white rounded-lg border-2 border-cyan-700 px-2 py-1 hover:bg-cyan-600 hover:text-white"
-            >
-              View
-            </button>
+            <div className="flex flex-col items-center gap-0">
+              {/* Top buttons */}
+              <div className="flex gap-0 w-96">
+                <button
+                  onClick={() => {
+                    setSerialNumber(row.serialNumber);
+                    document.getElementById("add-measurement").showModal();
+                  }}
+                  className="w-1/2 text-cyan-700 font-medium cursor-pointer bg-white rounded-tl-lg border-t-2 border-l-2 border-cyan-700 px-3 py-2 hover:bg-cyan-700 hover:text-white transition-colors duration-200"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => {
+                    setSerialNumber(row.serialNumber);
+                    getAllInputValuesBySerialNumber(row.serialNumber)
+                    console.log("GETTTINPUT")
+                    document.getElementById("prediction").showModal();
+                  }}
+                  className="w-1/2 text-cyan-700 font-medium cursor-pointer bg-white rounded-tr-lg border-t-2 border-l-2 border-r-2  border-cyan-700 px-3 py-2 hover:bg-cyan-700 hover:text-white transition-colors duration-200"
+                >
+                  Prediction
+                </button>
+              </div>
+          
+              {/* Bottom buttons */}
+              <div className="flex gap-0 w-96">
+                <button
+                  onClick={() => {
+                    setSerialNumber(row.serialNumber);
+                    document.getElementById("uncertainty").showModal();
+                  }}
+                  className="w-1/2 text-cyan-700 font-medium cursor-pointer bg-white rounded-bl-lg border-t-2 border-b-2 border-l-2 border-cyan-700 px-3 py-2 hover:bg-cyan-700 hover:text-white transition-colors duration-200"
+                >
+                  Uncertainty
+                </button>
+                <button
+                  onClick={() => {
+                    setSerialNumber(row.serialNumber);
+                    document.getElementById("calibration-interval").showModal();
+                  }}
+                  className="w-1/2 text-cyan-700 font-medium cursor-pointer bg-white rounded-br-lg border-2 border-cyan-700 px-3 py-2 hover:bg-cyan-700 hover:text-white transition-colors duration-200"
+                >
+                  Calibration Interval
+                </button>
+              </div>
+            </div>
           );
+          
         },
       },
+      
     ],
     []
   );

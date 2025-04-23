@@ -31,5 +31,18 @@ class MeasurementContoller:
                 status_code=500,
                 content={"success": False, "message": str(e)}
             )
+            
+    async def get_all_input_values_by_serial_number(self, serial_number: str):
+        try:
+            measurements = await self.measurement_service.get_all_input_values_by_serial_number(serial_number)
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data": measurements}
+            )
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"success": False, "message": str(e)}
+            )
 
            

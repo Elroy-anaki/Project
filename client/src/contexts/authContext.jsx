@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createContext } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { AddMeasurementProvider } from "./addMeasurementContext";
+import { SharedProvider } from "./sharedContext";
 
 export const AuthContext = createContext();
 
@@ -53,7 +53,7 @@ function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={authGlobalState}>
-      <AddMeasurementProvider>{children}</AddMeasurementProvider>
+      <SharedProvider>{children}</SharedProvider>
     </AuthContext.Provider>
   );
 }
