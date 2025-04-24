@@ -5,6 +5,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 import scipy.stats as stats
 from datetime import datetime
+import io
+import base64
 
 # preprocess_data - כל הפונקציות מקבלות את מה שחוזר מהפונקציה
 
@@ -179,15 +181,19 @@ def calibration_for_subset(subset, to_plot=False, serial_number=None, input_valu
                  fontsize=12, verticalalignment='top')
         print("work......")
         plt.savefig(f"lin_reg_serial_number={serial_number}_input_value={input_value}.png")
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
         plt.close()
+        buf.seek(0)
+        plt.close()
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+
     
-    # return {"a": a, "b": b, "u2a": uncertainty_squared_a, "cov(a,b)": cov_ab,
-    #         "chi2_stat": chi2_stat, "n": len(subset), "df": df, "status": "passed" if did_pass else "rejected", "R2": r2}
     
     # ValueError: Out of range float values are not JSON compliant FROM this feild *****"chi2_quantil_95": quantile_95,*****
     return {"a": a, "b": b, "u2a": uncertainty_squared_a, "u2b": uncertainty_squared_b, "cov(a,b)": cov_ab,
             "chi2_stat": chi2_stat, "n": len(subset), "df": df, "chi2_quantil_95": quantile_95,
-            "status": "passed" if did_pass else "rejected", "R2": r2}
+            "status": "passed" if did_pass else "rejected", "R2": r2, "image": image_base64}
 
 def calibration(data, serial_number, input_value, to_plot=False):
     print("Data --------", data)
@@ -196,7 +202,7 @@ def calibration(data, serial_number, input_value, to_plot=False):
         (pd.to_numeric(data["input_value"], errors="coerce") == float(input_value))
     ]
     print("Subset--------", subset)
-    return calibration_for_subset(subset, to_plot=to_plot, serial_number=serial_number, input_value=input_value)
+    return calibration_for_subset(subset, to_plot=True, serial_number=serial_number, input_value=input_value)
 
 
 # def apply_calibration_for_all(data):

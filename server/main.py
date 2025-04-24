@@ -3,6 +3,7 @@ from routes.customer_routes import customer_router
 from fastapi.middleware.cors import CORSMiddleware
 from routes.device_customer_routes import device_customer_router
 from routes.measurements_routes import measurements_router
+from middleware.database_middleware import initial_data
 
 
 

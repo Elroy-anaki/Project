@@ -59,4 +59,14 @@ async def predict_calibration_by_serial_number_and_input(
     except Exception as e:
         print("error", e)
         raise HTTPException(status_code=500, detail="failed featching a measurement")
+    
+@measurements_router.post("/{serial_number}/predict-uncertainty")
+async def predict_uncertainty_by_serial_number(serial_number: str, request: Request):
+    try:
+        print("Currect path... uncertainty")
+        utils_service = UtilsService()
+        return await utils_service.predict_uncertainty_by_serial_number(serial_number, request)
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
        
