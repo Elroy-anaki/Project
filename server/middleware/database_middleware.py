@@ -18,7 +18,7 @@ def initial_data():
     measurements = db.query(Measurement).all()
     data = [m.to_json() for m in measurements]
     df = pd.DataFrame(data)
-    print("Data proccesed....")
+    
     return preprocess_data(df)
 
 

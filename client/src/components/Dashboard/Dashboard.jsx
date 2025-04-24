@@ -87,7 +87,7 @@ function Dashboard() {
                 <button
                   onClick={() => {
                     setSerialNumber(row.serialNumber);
-                    document.getElementById("uncertainty").showModal();
+                    document.getElementById("uncertainty-modal").showModal();
                   }}
                   className="w-1/2 text-cyan-700 font-medium cursor-pointer bg-white rounded-bl-lg border-t-2 border-b-2 border-l-2 border-cyan-700 px-3 py-2 hover:bg-cyan-700 hover:text-white transition-colors duration-200"
                 >

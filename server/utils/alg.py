@@ -139,9 +139,11 @@ def calibration_for_subset(subset, to_plot=False, serial_number=None, input_valu
     r = w * (y - (a + b * x))
     chi2_stat = sum(r ** 2)
     df = len(subset) - 2
+    print("work......")
 
     # Compute the quantile (critical value) for the chi-square distribution
-    quantile_95 = stats.chi2.ppf(0.95, df)  # todo: 0.05 or 0.95?
+    quantile_95 = stats.chi2.ppf(0.95, df) if df > 0 else 1 # NEED TO CHANGE - YONIT
+  # todo: 0.05 or 0.95?
     did_pass = chi2_stat < quantile_95
 
     if to_plot:
@@ -158,6 +160,7 @@ def calibration_for_subset(subset, to_plot=False, serial_number=None, input_valu
         plt.title('Deviation Over Time with Best Fit Line')
         plt.legend()
 
+        print("work......")
         # Annotate the plot with the R^2 value, intercept (a), and slope (b)
         plt.text(0.05, 0.95, f'$R^2 = {r2:.3f}$', transform=plt.gca().transAxes,
                  fontsize=12, verticalalignment='top')
@@ -174,15 +177,20 @@ def calibration_for_subset(subset, to_plot=False, serial_number=None, input_valu
         plt.text(0.05, 0.65, f'$X^2 = {chi2_stat:.3f} < {quantile_95:.3f}, {"pass" if did_pass else "rejected"}$',
                  transform=plt.gca().transAxes,
                  fontsize=12, verticalalignment='top')
-
+        print("work......")
         plt.savefig(f"lin_reg_serial_number={serial_number}_input_value={input_value}.png")
         plt.close()
-
+    
+    # return {"a": a, "b": b, "u2a": uncertainty_squared_a, "cov(a,b)": cov_ab,
+    #         "chi2_stat": chi2_stat, "n": len(subset), "df": df, "status": "passed" if did_pass else "rejected", "R2": r2}
+    
+    # ValueError: Out of range float values are not JSON compliant FROM this feild *****"chi2_quantil_95": quantile_95,*****
     return {"a": a, "b": b, "u2a": uncertainty_squared_a, "u2b": uncertainty_squared_b, "cov(a,b)": cov_ab,
             "chi2_stat": chi2_stat, "n": len(subset), "df": df, "chi2_quantil_95": quantile_95,
             "status": "passed" if did_pass else "rejected", "R2": r2}
 
 def calibration(data, serial_number, input_value, to_plot=False):
+    print("Data --------", data)
     subset = data[
         (data["serial_number"].astype(str) == str(serial_number)) &
         (pd.to_numeric(data["input_value"], errors="coerce") == float(input_value))
