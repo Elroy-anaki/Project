@@ -25,6 +25,7 @@ function PredictNonexistent() {
       setResult(null);
     },
     onSuccess: (data) => {
+      console.log(data)
       setResult(data.data);
       setError("");
     },
@@ -164,22 +165,14 @@ function PredictNonexistent() {
                 <h2 className="text-2xl font-bold mb-4 text-cyan-700">
                   Prediction Results
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left text-lg">
-                  <div className="p-4 bg-white rounded-xl shadow">
-                    <p className="font-bold text-gray-600">u_predStandard</p>
-                    <p>{result.u_predStandard}</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-xl shadow">
-                    <p className="font-bold text-gray-600">EffictiveDF</p>
-                    <p>{result.EffictiveDF}</p>
-                  </div>
-                  <div className="p-4 bg-white rounded-xl shadow">
-                    <p className="font-bold text-gray-600">
-                      Uncertainty Extended
-                    </p>
-                    <p>{result.uncertainty_extended_prediction}</p>
-                  </div>
-                </div>
+                <h3 className="text-2xl text-black">{result.predicted_deviation}</h3>
+                <div className="">
+              <img
+                src={`data:image/png;base64,${result.image}`}
+                alt="Calibration Chart"
+                className="max-w-full h-[580px] rounded-xl border border-gray-300 shadow-md"
+              />
+            </div>
               </div>
             )}
           </div>

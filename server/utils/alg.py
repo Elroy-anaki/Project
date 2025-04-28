@@ -420,9 +420,13 @@ def predict_for_nonexistent_input_value(data, serial_number, identifier, query_d
       plt.grid(True)
       plt.tight_layout()
       plt.savefig(f"quadratic_fit_{serial_number}_{identifier}_{query_date.date()}_{query_input_value}.png")
+      buf = io.BytesIO()
+      plt.savefig(buf, format='png')
       plt.close()
+      buf.seek(0)
+      image_base64 = base64.b64encode(buf.read()).decode('utf-8')
 
-  return predicted_deviation
+  return {"predicted_deviation": predicted_deviation, "image": image_base64 if to_plot else None}
 
 def remove_last_measurement_by_date(data, serial_number, identifier):
     """Removes the last measurement (by date) for each input value within a subset of data.
@@ -524,7 +528,8 @@ def compare_deviations_uncertainties(data, serial_number, identifier, k=6):
         
     return pd.DataFrame(results).to_dict(orient="records")
 
-
+# Yes
+#  validation
 def percentage_pass_deviation_uncertainty_validation(data, serial_number, identifier, k=6):
   #print(f"called with {serial_number} and {identifier}")
   subset = data[(data["serial_number"]==serial_number) & (data["identifier"]==identifier)]
@@ -575,6 +580,7 @@ def apply_validation_all_combinations(data, k=6):
 
     return results
 
+# Yes
 def summarize_input_values(data):
     """
     Summarizes input values for each serial number and identifier.

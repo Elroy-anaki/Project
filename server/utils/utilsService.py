@@ -74,7 +74,7 @@ class UtilsService:
             identifier = data_req.get("identifier")
             query_date = data_req.get("query_date")
             query_value = data_req.get("query_value")
-            res = alg.predict_for_nonexistent_input_value(data, serial_number, identifier, query_date, query_value)
+            res = alg.predict_for_nonexistent_input_value(data, serial_number, identifier, query_date, query_value, to_plot=True)
             
             return JSONResponse(
                 status_code=200,
