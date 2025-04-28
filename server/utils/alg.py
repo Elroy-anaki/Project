@@ -7,6 +7,9 @@ import scipy.stats as stats
 from datetime import datetime
 import io
 import base64
+import os
+
+
 
 # preprocess_data - כל הפונקציות מקבלות את מה שחוזר מהפונקציה
 
@@ -42,6 +45,7 @@ def preprocess_data(data):
 # data - table מדידות
 # calibration - table מדידות , serial number , input_value
 # calibration_for_subset - callback
+# DONE -------------------------------------------------------------------------------
 
 def calibration_for_subset(subset, to_plot=False, serial_number=None, input_value=None):
     """
@@ -144,8 +148,7 @@ def calibration_for_subset(subset, to_plot=False, serial_number=None, input_valu
     print("work......")
 
     # Compute the quantile (critical value) for the chi-square distribution
-    quantile_95 = stats.chi2.ppf(0.95, df) if df > 0 else 1 # NEED TO CHANGE - YONIT
-  # todo: 0.05 or 0.95?
+    quantile_95 = stats.chi2.ppf(0.95, df)  
     did_pass = chi2_stat < quantile_95
 
     if to_plot:
@@ -185,15 +188,13 @@ def calibration_for_subset(subset, to_plot=False, serial_number=None, input_valu
         plt.savefig(buf, format='png')
         plt.close()
         buf.seek(0)
-        plt.close()
         image_base64 = base64.b64encode(buf.read()).decode('utf-8')
 
     
     
-    # ValueError: Out of range float values are not JSON compliant FROM this feild *****"chi2_quantil_95": quantile_95,*****
     return {"a": a, "b": b, "u2a": uncertainty_squared_a, "u2b": uncertainty_squared_b, "cov(a,b)": cov_ab,
             "chi2_stat": chi2_stat, "n": len(subset), "df": df, "chi2_quantil_95": quantile_95,
-            "status": "passed" if did_pass else "rejected", "R2": r2, "image": image_base64}
+            "status": "passed" if did_pass else "rejected", "R2": r2, "image": image_base64 if to_plot else None}
 
 def calibration(data, serial_number, input_value, to_plot=False):
     print("Data --------", data)
@@ -214,6 +215,8 @@ def calibration(data, serial_number, input_value, to_plot=False):
 # חישוב אי וודאות
 # predict_uncertainty
 # predict_uncertainty_for_subset - callback
+# DONE -------------------------------------------------------------------------------
+
 
 def predict_uncertainty_for_subset(subset, query_date, query_value, k=6):
     if subset.empty:
@@ -228,8 +231,9 @@ def predict_uncertainty_for_subset(subset, query_date, query_value, k=6):
 
     # Make a copy to avoid modifying the original DataFrame
     subset = subset.copy()
-
+    # TO CHECK subset["uncertainty"] = pd.to_numeric(subset["uncertainty"], errors="coerce")
     subset["uncertainty"] /= 2
+    # TO CHECK print("work...")
 
     if not isinstance(query_date, datetime):
         query_date = datetime.strptime(query_date,"%d/%m/%Y" )
@@ -268,13 +272,13 @@ def predict_uncertainty(data, serial_number, identifier, query_date, query_value
     return predict_uncertainty_for_subset(subset, query_date, query_value, k)
 
 
-# def predict_uncertainty_for_all(data,  query_date, query_value, k=6):
-#     def predict_uncertainty_for_subset_helper(subset):
-#         return predict_uncertainty_for_subset(subset, query_date, query_value, k)
-#     res = data.groupby(["serial_number", "identifier"]).apply(predict_uncertainty_for_subset_helper)
-#     res = pd.DataFrame.from_records(res, columns=list(res.iloc[0].keys()), index=res.index)
+def predict_uncertainty_for_all(data,  query_date, query_value, k=6):
+    def predict_uncertainty_for_subset_helper(subset):
+        return predict_uncertainty_for_subset(subset, query_date, query_value, k)
+    res = data.groupby(["serial_number", "identifier"]).apply(predict_uncertainty_for_subset_helper)
+    res = pd.DataFrame.from_records(res, columns=list(res.iloc[0].keys()), index=res.index)
 
-#     return res
+    return res
 
 
 def find_calibration_interval_for_subset(subset, risk_factor):
@@ -315,6 +319,8 @@ def find_calibration_interval_for_subset(subset, risk_factor):
 # find_calibration_interval
 # find_calibration_interval_for_subset - callback
 # output - time
+# DONE -------------------------------------------------------------------------------
+
 
 def find_calibration_interval(data, serial_number, identifier, risk_factor):
 
@@ -349,7 +355,7 @@ def write_calibration_certificate(data, serial_number, identifier):
                              "deviation": predicted_deviation, "unc": unc})
 
   calibration_certificate = pd.DataFrame(certificate_data)
-  return calibration_certificate
+  return calibration_certificate.to_dict(orient="records")
 
 # חיזוי value שלא קיים
 # predict_for_nonexistent_input_value - return data for canvas
@@ -515,7 +521,9 @@ def compare_deviations_uncertainties(data, serial_number, identifier, k=6):
             'En': statistic,
             'comparison_to_1': comparison
         })
-    return pd.DataFrame(results)
+        
+    return pd.DataFrame(results).to_dict(orient="records")
+
 
 def percentage_pass_deviation_uncertainty_validation(data, serial_number, identifier, k=6):
   #print(f"called with {serial_number} and {identifier}")
@@ -563,6 +571,7 @@ def apply_validation_all_combinations(data, k=6):
 
     results = data.groupby(['serial_number', 'identifier'], dropna=True).apply(validation_wrapper) # dropna to remove null identifiers
     results = results.droplevel(2, axis=0)  # Remove unnecessary multi-index level
+    print(results)
 
     return results
 
@@ -590,89 +599,90 @@ def summarize_input_values(data):
 
     return result
 
-# def calibration_tool(data):
-#     """
-#     Switches between calibration interval and certificate based on user input,
-#     with separate input validation for each parameter.
+def calibration_tool(data):
+    """
+    Switches between calibration interval and certificate based on user input,
+    with separate input validation for each parameter.
 
-#     Args:
-#         data: The DataFrame containing all the measurement data.
+    Args:
+        data: The DataFrame containing all the measurement data.
 
-#     Returns:
-#         None (Prints the results)
-#     """
+    Returns:
+        None (Prints the results)
+    """
 
-#     while True:
-#         choice = input("Enter 1 for calibration certificate, 2 for finding interval, or 'q' to quit: ")
+    while True:
+        choice = input("Enter 1 for calibration certificate, 2 for finding interval, or 'q' to quit: ")
 
-#         if choice == '1':  # Calibration Certificate
-#             while True:
-#                 serial_number = input("Enter serial number: ")
-#                 if not (data['serial_number'] == serial_number).any():
-#                     print("Invalid serial number. Please try again.")
-#                     continue  # Go back to the beginning of the loop
+        if choice == '1':  # Calibration Certificate
+            while True:
+                serial_number = input("Enter serial number: ")
+                if not (data['serial_number'] == serial_number).any():
+                    print("Invalid serial number. Please try again.")
+                    continue  # Go back to the beginning of the loop
 
-#                 identifier = input("Enter identifier: ")
-#                 if not (data['identifier'] == identifier).any() and False:
-#                     print("Invalid identifier. Please try again.")
-#                     continue  # Go back to the beginning of the loop
+                identifier = input("Enter identifier: ")
+                if not (data['identifier'] == identifier).any() and False:
+                    print("Invalid identifier. Please try again.")
+                    continue  # Go back to the beginning of the loop
 
-#                 print("Calibration Certificate:")
-#                 print(write_calibration_certificate(data, serial_number, identifier))
-#                 break  # Exit the inner loop
+                print("Calibration Certificate:")
+                print(write_calibration_certificate(data, serial_number, identifier))
+                break  # Exit the inner loop
 
-#         elif choice == '2':  # Calibration Interval
-#             while True:
-#                 serial_number = input("Enter serial number: ")
-#                 if not (data['serial_number'] == serial_number).any():
-#                     print("Invalid serial number. Please try again.")
-#                     continue  # Go back to the beginning of the loop
+        elif choice == '2':  # Calibration Interval
+            while True:
+                serial_number = input("Enter serial number: ")
+                if not (data['serial_number'] == serial_number).any():
+                    print("Invalid serial number. Please try again.")
+                    continue  # Go back to the beginning of the loop
 
-#                 identifier = input("Enter identifier: ")
-#                 if not (data['identifier'] == identifier).any():
-#                     print("Invalid identifier. Please try again.")
-#                     continue  # Go back to the beginning of the loop
+                identifier = input("Enter identifier: ")
+                if not (data['identifier'] == identifier).any():
+                    print("Invalid identifier. Please try again.")
+                    continue  # Go back to the beginning of the loop
 
-#                 try:
-#                     risk_factor = float(input("Enter risk factor (a number): "))
-#                 except ValueError:
-#                     print("Invalid risk factor. Please enter a number.")
-#                     continue  # Go back to the beginning of the loop
+                try:
+                    risk_factor = float(input("Enter risk factor (a number): "))
+                except ValueError:
+                    print("Invalid risk factor. Please enter a number.")
+                    continue  # Go back to the beginning of the loop
 
-#                 interval = find_calibration_interval(data, serial_number, identifier, risk_factor)
-#                 print(f"Calibration interval (years): {interval}")
-#                 break  # Exit the inner loop
+                interval = find_calibration_interval(data, serial_number, identifier, risk_factor)
+                print(f"Calibration interval (years): {interval}")
+                break  # Exit the inner loop
 
-#         elif choice.lower() == 'q':
-#             break  # Exit the main loop
+        elif choice.lower() == 'q':
+            break  # Exit the main loop
 
-#         else:
-#             print("Invalid choice. Please enter 1, 2, or 'q'.")
+        else:
+            print("Invalid choice. Please enter 1, 2, or 'q'.")
 
-# def merge_with_amit_example_data(data):
-#     # merging with example data from Amit - can ignore that
-#     example_data = pd.read_excel("Calibration Interval Exmple for Caliper update.xlsx", skiprows=2, nrows=20)
-#     example_data = example_data[
-#         ["Date:", "DateValue:", "Input", "Uncertainty", "IdString", "Deviation", "Tolerance"]].copy()
-#     example_data.columns = ['measurement_date', "date_value", "input_value", "uncertainty", "identifier", "deviation",
-#                             "tolerance"]
-#     example_data["serial_number"] = "4-01"
-#     example_data['measurement_date'] = pd.to_datetime(example_data['measurement_date'], dayfirst=True)
-#     example_data.drop(["date_value"], axis=1, inplace=True)
-#     data = pd.concat((example_data, data))
-#     return data
+def merge_with_amit_example_data(data):
+    # merging with example data from Amit - can ignore that
+    example_data = pd.read_excel("Calibration Interval Exmple for Caliper update.xlsx", skiprows=2, nrows=20)
+    example_data = example_data[
+        ["Date:", "DateValue:", "Input", "Uncertainty", "IdString", "Deviation", "Tolerance"]].copy()
+    example_data.columns = ['measurement_date', "date_value", "input_value", "uncertainty", "identifier", "deviation",
+                            "tolerance"]
+    example_data["serial_number"] = "4-01"
+    example_data['measurement_date'] = pd.to_datetime(example_data['measurement_date'], dayfirst=True)
+    example_data.drop(["date_value"], axis=1, inplace=True)
+    data = pd.concat((example_data, data))
+    return data
 
 
 def main(data_path):
 
     #read data - MUST
-    data = pd.read_csv(data_path)
+    data = initial_data()
 
+  
     # AFTER BUILDING WEBSITE< IGNORE THIS MERGE (it appears now because there are calls on merged data)
-    data = merge_with_amit_example_data(data)
+    # data = merge_with_amit_example_data(data)
 
     # preprocess - MUST
-    data = preprocess_data(data)
+    # data = preprocess_data(data)
 
 
     # POSSIBLE SCREEN: show data summary
@@ -686,7 +696,7 @@ def main(data_path):
 
     # calcukate for all subsets in data
     # POSSIBLE SCREEN: show this table (indexed by serial number and input value, with many stastical quantities for the lin reg performed on them)
-    results_linear = apply_calibration_for_all(data)
+    # results_linear = apply_calibration_for_all(data)
 
     query_date = "21/04/2025" # date string should be in format "%d/%m/%Y"
     query_value = 20

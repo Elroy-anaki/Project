@@ -26,3 +26,10 @@ class MeasurementService:
             return measurements
         except Exception as e:
             raise e
+        
+    async def get_all_get_identifiers_by_serial_number(self, serial_number: str):
+        try:
+            identifiers = self.measurement_dal.get_all_get_identifiers_by_serial_number(serial_number=serial_number)
+            return identifiers
+        except Exception as e:
+            raise e

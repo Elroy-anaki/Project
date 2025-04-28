@@ -41,5 +41,22 @@ class MeasurementDal:
             return [float(row[0]) for row in input_values]
         except Exception as e:
             raise e
+        
+    def get_all_get_identifiers_by_serial_number(self, serial_number):
+        try:
+            identifiers = (
+                self.db.query(Measurement.identifier)
+                .distinct()
+                .filter(Measurement.serial_number == serial_number)
+                .all()
+                  
+            )
+            identifiers = [identifier[0] for identifier in identifiers]
             
+            print("identifiers--", identifiers)
+            return identifiers
+        except Exception as e:
+            raise e
+            
+    
     

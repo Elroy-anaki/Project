@@ -2,6 +2,8 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from middleware.database_middleware import initial_data
 import utils.alg as alg
+import json
+
 
 
 
@@ -21,14 +23,11 @@ class UtilsService:
     async def predict_uncertainty_by_serial_number(self, serial_number: str, request: Request):
         try:
             data = initial_data()
-            print(data["identifier"])
+            print(data)
             data_req = await request.json()
             identifier = data_req.get("identifier")
             query_date = data_req.get("query_date")
             query_value = data_req.get("query_value")
-            print("---------")
-            print(identifier, query_date, query_value)
-            return 5
             uncertainty = alg.predict_uncertainty(data, serial_number, identifier, query_date, query_value)
             
             return JSONResponse(
@@ -37,4 +36,72 @@ class UtilsService:
             )
         except Exception as e:
             raise e
+        
+        
+    async def find_calibration_interval(self, serial_number:str,  request: Request):
+        try:
+            data = initial_data()
+            data_req = await request.json()
+            identifier = data_req.get("identifier")
+            risk_factor = data_req.get("risk_factor")
+            print("alg")
+            calibaration_interval = alg.find_calibration_interval(data, serial_number, identifier, risk_factor)
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data": calibaration_interval}
+            )
+        except Exception as e:
+            raise e
+        
+    async def write_calibration_certificate(self, serial_number:str,  request: Request):
+        try:
+            data = initial_data()
+            data_req = await request.json()
+            identifier = data_req.get("identifier")
+            res = alg.write_calibration_certificate(data, serial_number, identifier)
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data": res}
+            )
+        except Exception as e:
+            raise e
+        
+    async def predict_for_nonexisting_input(self, serial_number:str,  request: Request):
+        try:
+            print("none....")
+            data = initial_data()
+            data_req = await request.json()
+            identifier = data_req.get("identifier")
+            query_date = data_req.get("query_date")
+            query_value = data_req.get("query_value")
+            res = alg.predict_for_nonexistent_input_value(data, serial_number, identifier, query_date, query_value)
+            
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data": res}
+            )
+        except Exception as e:
+            raise e
+        
+        
+    async def compare_deviations_uncertainties(self, serial_number:str,  request: Request):
+        try:
+            data = initial_data()
+            data_req = await request.json()
+            identifier = data_req.get("identifier")
+            res = alg.compare_deviations_uncertainties(data, serial_number, identifier)
+            print(res)
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data":  res})
+        except Exception as e:
+            raise e
+        
+        
+        
+        
+    async def all():
+        data = initial_data()
+        res = alg.summarize_input_values(data)
+        return {"res": res}
         

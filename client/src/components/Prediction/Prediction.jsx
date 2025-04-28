@@ -10,14 +10,7 @@ function Prediction() {
   const [chosenInputValue, setChosenInputValue] = useState("");
   const [result, setResult] = useState(null);
 
-  const { mutate: predict } = useMutation({
-    mutationKey: ["predict"],
-    mutationFn: async () => {
-      const { data } = await axios.get(``);
-      setResult(data.data);
-      return data;
-    },
-  });
+  
   const { mutate: prdeict } = useMutation({
     mutationKey: ["predict"],
     mutationFn: async () => {

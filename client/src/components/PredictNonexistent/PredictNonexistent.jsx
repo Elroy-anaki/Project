@@ -3,45 +3,66 @@ import { SharedContext } from "../../contexts/sharedContext";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
-function Uncertainty() {
-  const { serialNumber, inputValues, setInputValues, identifiers } = useContext(SharedContext);
+function PredictNonexistent() {
+  const { serialNumber, inputValues, identifiers } = useContext(SharedContext);
   const [chosenInputValue, setChosenInputValue] = useState("");
   const [chosenIdentifier, setChosenIdentifier] = useState("");
   const [chosenDate, setChosenDate] = useState("");
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
-  const { mutate: predictUncertaintyBySerialNumber } = useMutation({
-    mutationKey: ["predictUncertaintyBySerialNumber"],
+  const { mutate: PredictForNonexistingInput } = useMutation({
+    mutationKey: ["PredictForNonexistingInput"],
     mutationFn: async (query) => {
-      const { data } = await axios.post(`/measurements/${serialNumber}/predict-uncertainty`, query);
+      const { data } = await axios.post(
+        `measurements/${serialNumber}/predict-for-nonexisting-input`,
+        query
+      );
+      return data;
+    },
+    onError: (e) => {
+      setError("There are no measurements to predict with.");
+      setResult(null);
+    },
+    onSuccess: (data) => {
       setResult(data.data);
-      console.log(data.data);
-      return;
+      setError("");
     },
   });
 
   return (
     <>
-      <dialog id="uncertainty-modal" className="modal text-center">
-      <div className="modal-box bg-white border border-gray-200 shadow-xl rounded-2xl w-5/6 max-w-none px-10">
+      <dialog id="predict-nonexisting-modal" className="modal text-center">
+        <div className="modal-box bg-white border border-gray-200 shadow-xl rounded-2xl w-5/6 max-w-none px-10">
           {/* Close Button */}
           <button
             id="close-modal-mes"
             type="button"
             className="absolute top-4 right-4 rounded-full cursor-pointer p-2 bg-rose-500 text-white font-bold hover:bg-rose-600 transition"
-            onClick={() => document.getElementById("uncertainty-modal").close()}
+            onClick={() => {
+              document.getElementById("predict-nonexisting-modal").close();
+              setChosenDate("");
+              setChosenIdentifier("");
+              setError("");
+              setResult("");
+              setChosenIdentifier("")
+            }}
           >
             ✕
           </button>
 
-          <h1 className="text-3xl font-bold text-cyan-700 mb-8">Predict Uncertainty</h1>
+          <h1 className="text-3xl font-bold text-cyan-700 mb-8">
+            Predict for nonexisting input
+          </h1>
 
           <div className="w-full flex flex-col gap-6 items-center justify-center">
-
             <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Input Value */}
               <div className="flex flex-col">
-                <label htmlFor="input_value" className="text-gray-700 font-semibold mb-2">
+                <label
+                  htmlFor="input_value"
+                  className="text-gray-700 font-semibold mb-2"
+                >
                   Choose Input Value
                 </label>
                 <select
@@ -65,7 +86,10 @@ function Uncertainty() {
 
               {/* Identifier */}
               <div className="flex flex-col">
-                <label htmlFor="identifier" className="text-gray-700 font-semibold mb-2">
+                <label
+                  htmlFor="identifier"
+                  className="text-gray-700 font-semibold mb-2"
+                >
                   Choose Identifier
                 </label>
                 <select
@@ -76,15 +100,13 @@ function Uncertainty() {
                 >
                   <option value="">Select identifier</option>
                   {identifiers.length > 0 && identifiers[0] !== null ? (
-                    identifiers.map((identifier, index) => {
-                      if (identifier !== "") {
-                        return (
-                          <option key={index} value={identifier}>
-                            {identifier}
-                          </option>
-                        );
-                      }
-                    })
+                    identifiers.map((identifier, index) =>
+                      identifier !== "" ? (
+                        <option key={index} value={identifier}>
+                          {identifier}
+                        </option>
+                      ) : null
+                    )
                   ) : (
                     <option disabled>There are no options</option>
                   )}
@@ -93,7 +115,10 @@ function Uncertainty() {
 
               {/* Date Picker */}
               <div className="flex flex-col">
-                <label htmlFor="query_date" className="text-gray-700 font-semibold mb-2">
+                <label
+                  htmlFor="query_date"
+                  className="text-gray-700 font-semibold mb-2"
+                >
                   Choose Date
                 </label>
                 <input
@@ -118,18 +143,27 @@ function Uncertainty() {
                   query_date: chosenDate,
                   query_value: Number(chosenInputValue),
                 };
-                console.log("data to sent", data);
-                predictUncertaintyBySerialNumber(data);
+                console.log("data to send:", data);
+                PredictForNonexistingInput(data);
               }}
               className="w-fit mt-6 px-8 py-3 bg-cyan-700 text-white text-lg rounded-xl font-semibold hover:bg-cyan-800 transition"
             >
-              Predict Uncertainty
+              Predict for nonexisting input
             </button>
 
-            {/* Prediction Result */}
-            {result && (
+            {/* Show Error or Result */}
+            {error && (
+              <div className="w-full mt-10 bg-red-100 p-6 rounded-2xl shadow-lg text-red-700">
+                <h2 className="text-2xl font-bold mb-4">Error</h2>
+                <p className="text-lg">{error}</p>
+              </div>
+            )}
+
+            {result && !error && (
               <div className="w-full mt-10 bg-gray-100 p-6 rounded-2xl shadow-lg text-black">
-                <h2 className="text-2xl font-bold mb-4 text-cyan-700">Prediction Results</h2>
+                <h2 className="text-2xl font-bold mb-4 text-cyan-700">
+                  Prediction Results
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left text-lg">
                   <div className="p-4 bg-white rounded-xl shadow">
                     <p className="font-bold text-gray-600">u_predStandard</p>
@@ -140,13 +174,14 @@ function Uncertainty() {
                     <p>{result.EffictiveDF}</p>
                   </div>
                   <div className="p-4 bg-white rounded-xl shadow">
-                    <p className="font-bold text-gray-600">Uncertainty Extended</p>
+                    <p className="font-bold text-gray-600">
+                      Uncertainty Extended
+                    </p>
                     <p>{result.uncertainty_extended_prediction}</p>
                   </div>
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </dialog>
@@ -154,4 +189,4 @@ function Uncertainty() {
   );
 }
 
-export default Uncertainty;
+export default PredictNonexistent;

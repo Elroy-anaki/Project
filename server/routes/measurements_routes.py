@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, Request, Response, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-from middleware.database_middleware import get_db
+from middleware.database_middleware import get_db 
 from controllers.measurement_controller import MeasurementContoller
-from utils.utilsService import UtilsService
+from utils.utilsService import UtilsService 
+from utils import alg
 
 
 measurements_router = APIRouter()
@@ -35,8 +36,6 @@ async def get_all_measurement_by_serial_number(
 @measurements_router.get("/{serial_number}/input-values")
 async def get_all_input_values_by_serial_number(
     serial_number: str,
-    request: Request,
-    response: Response,
     db: Session = Depends(get_db)
 ): 
     try:
@@ -69,4 +68,67 @@ async def predict_uncertainty_by_serial_number(serial_number: str, request: Requ
     except Exception as e:
         print("error", e)
         raise HTTPException(status_code=500, detail="failed featching a measurement")
+    
+@measurements_router.get("/{serial_number}/identifiers")
+async def get_identifier_by_serial_number(serial_number: str, request: Request, db: Session = Depends(get_db)):
+    try:
+        controller = MeasurementContoller(db)
+        return await controller.get_all_get_identifiers_by_serial_number(serial_number)
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+    
+    
+@measurements_router.post("/{serial_number}/calibration-interval")
+async def find_caliaration_interval(serial_number: str, request: Request):
+    try:
+        print("calibaration")
+        utils_service = UtilsService()
+        return await utils_service.find_calibration_interval(serial_number, request)
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+    
+    
+@measurements_router.post("/{serial_number}/write-calibration-certificate")
+async def write_calibration_certificate(serial_number: str, request: Request):
+    try:
+        print("write-calibration-certificate")
+        utils_service = UtilsService()
+        return await utils_service.write_calibration_certificate(serial_number, request)
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+    
+    
+@measurements_router.post("/{serial_number}/predict-for-nonexisting-input")
+async def predict_for_nonexisting_input(serial_number: str, request: Request):
+    try:
+        print("write-calibration-certificate")
+        utils_service = UtilsService()
+        return await utils_service.predict_for_nonexisting_input(serial_number, request)
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+        
+@measurements_router.post("/{serial_number}/compare-deviations-uncertainties")
+async def predict_for_nonexisting_input(serial_number: str, request: Request):
+    try:
+        print("compare-deviations-uncertainties")
+        utils_service = UtilsService()
+        return await utils_service.compare_deviations_uncertainties(serial_number, request)
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+        
        
+@measurements_router.get("/all")
+async def all(request: Request):
+    try:
+        
+        print("Currect path... all")
+        utils_service = UtilsService()
+        return await utils_service.all()
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")

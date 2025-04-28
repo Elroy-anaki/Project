@@ -17,6 +17,9 @@ import AddMeasurement from "./components/AddMeasurement/AddMeasurement";
 import Prediction from "./components/Prediction/Prediction";
 import Uncertainty from "./components/Uncertainty/Uncertainty";
 import CalibrationInterval from "./components/CalibrationInterval/CalibrationInterval";
+import WriteCalibrationCertificate from "./components/writeCalibrationCertificate/writeCalibrationCertificate";
+import PredictNonexistent from "./components/PredictNonexistent/PredictNonexistent";
+import CompareDeviationsUncertainties from "./components/CompareDeviationsUncertainties/CompareDeviationsUncertainties";
 
 function Root() {
   return (
@@ -33,6 +36,9 @@ function Root() {
         <Prediction />
         <Uncertainty />
         <CalibrationInterval />
+        <WriteCalibrationCertificate />
+        <PredictNonexistent />
+        <CompareDeviationsUncertainties />
       </main>
     </>
   );

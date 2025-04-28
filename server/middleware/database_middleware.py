@@ -15,10 +15,11 @@ def get_db():
 
 def initial_data():
     db = database.SessionLocal()
-    measurements = db.query(Measurement).all()
-    data = [m.to_json() for m in measurements]
-    df = pd.DataFrame(data)
-    
+    # measurements = db.query(Measurement).all()
+    # data = [m.to_json() for m in measurements]
+    # df = pd.DataFrame(data)
+    # df.to_csv("temp.csv")
+    df = pd.read_sql(f"SELECT * FROM {Measurement.__tablename__}", database.engine)
     return preprocess_data(df)
 
 

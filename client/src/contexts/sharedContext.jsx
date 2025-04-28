@@ -8,6 +8,8 @@ export function SharedProvider({ children }) {
 
     const [serialNumber, setSerialNumber] = useState("")
     const [inputValues, setInputValues] = useState([])
+    const [identifiers, setIdentifiers] = useState([])
+    
 
     const {mutate: getAllInputValuesBySerialNumber} = useMutation({
         mutationKey: ["getAllInputValuesBySerialNumber"],
@@ -18,6 +20,15 @@ export function SharedProvider({ children }) {
           return data
         } 
       })
+    const {mutate: gtAllIdentifiersBySerialNumber} = useMutation({
+      mutationKey: ["gtAllIdentifiersBySerialNumber"],
+      mutationFn: async (serialN) => {
+        const {data} = await axios.get(`/measurements/${serialN}/identifiers`)
+        console.log(data.data)
+        setIdentifiers(data.data);
+        return data
+      } 
+    })
     
 
 
@@ -27,7 +38,9 @@ export function SharedProvider({ children }) {
         setSerialNumber,
         inputValues,
         setInputValues,
-        getAllInputValuesBySerialNumber
+        getAllInputValuesBySerialNumber,
+        gtAllIdentifiersBySerialNumber,
+        identifiers
         
     }
 
