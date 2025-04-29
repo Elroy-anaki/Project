@@ -17,7 +17,18 @@ async def create_measurement(request: Request,response: Response, db: Session = 
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="failed creating a measurement")
-    
+
+
+@measurements_router.get("/summarize-input-values")
+async def summarize_input_values():
+    try:
+        print("Currect path... summarize_input_values")
+        utils_service = UtilsService()
+        return await utils_service.summarize_input_values()
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+
 @measurements_router.get("/{serial_number}")
 async def get_all_measurement_by_serial_number(
     serial_number: str,
@@ -112,7 +123,7 @@ async def predict_for_nonexisting_input(serial_number: str, request: Request):
         raise HTTPException(status_code=500, detail="failed featching a measurement")
         
 @measurements_router.post("/{serial_number}/compare-deviations-uncertainties")
-async def predict_for_nonexisting_input(serial_number: str, request: Request):
+async def compare_deviations_uncertainties(serial_number: str, request: Request):
     try:
         print("compare-deviations-uncertainties")
         utils_service = UtilsService()
@@ -120,15 +131,15 @@ async def predict_for_nonexisting_input(serial_number: str, request: Request):
     except Exception as e:
         print("error", e)
         raise HTTPException(status_code=500, detail="failed featching a measurement")
-        
-       
-@measurements_router.get("/all")
-async def all(request: Request):
+    
+@measurements_router.post("/{serial_number}/percentage-pass-deviation-uncertainty-validation")
+async def predict_for_nonexisting_input(serial_number: str, request: Request):
     try:
-        
-        print("Currect path... all")
+        print("percentage-pass-deviation-uncertainty-validation")
         utils_service = UtilsService()
-        return await utils_service.all()
+        return await utils_service.percentage_pass_deviation_uncertainty_validation(serial_number, request)
     except Exception as e:
         print("error", e)
         raise HTTPException(status_code=500, detail="failed featching a measurement")
+        
+

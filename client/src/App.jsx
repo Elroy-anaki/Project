@@ -20,6 +20,8 @@ import CalibrationInterval from "./components/CalibrationInterval/CalibrationInt
 import WriteCalibrationCertificate from "./components/writeCalibrationCertificate/writeCalibrationCertificate";
 import PredictNonexistent from "./components/PredictNonexistent/PredictNonexistent";
 import CompareDeviationsUncertainties from "./components/CompareDeviationsUncertainties/CompareDeviationsUncertainties";
+import Validation from "./components/Validation/Validation";
+import Summarize from "./components/Summarize/Summarize";
 
 function Root() {
   return (
@@ -39,6 +41,8 @@ function Root() {
         <WriteCalibrationCertificate />
         <PredictNonexistent />
         <CompareDeviationsUncertainties />
+        <Validation />
+        <Summarize />
       </main>
     </>
   );

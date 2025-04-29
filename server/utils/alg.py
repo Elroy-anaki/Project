@@ -7,7 +7,7 @@ import scipy.stats as stats
 from datetime import datetime
 import io
 import base64
-import os
+import traceback
 
 
 
@@ -541,14 +541,16 @@ def percentage_pass_deviation_uncertainty_validation(data, serial_number, identi
 
 
   results = compare_deviations_uncertainties(data, serial_number, identifier, k)
+  
   try:
     if results.empty:
       print(f"cannot estimate LOO percentage pass for serial number: {serial_number} and identifier: {identifier} since LOO not applicable for any of its input values")
       return value2counts, np.nan
-    return value2counts, 100 * float(results["comparison_to_1"].mean())
+    return results
   except Exception as e:
-    print(e.with_traceback())
+    traceback.print_exc() 
     print(results)
+
 
 
 def apply_validation_all_combinations(data, k=6):

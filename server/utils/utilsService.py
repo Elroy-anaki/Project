@@ -97,11 +97,32 @@ class UtilsService:
         except Exception as e:
             raise e
         
+    async def percentage_pass_deviation_uncertainty_validation(self, serial_number:str,  request: Request):
+        try:
+            data = initial_data()
+            data_req = await request.json()
+            identifier = data_req.get("identifier")
+            res = alg.percentage_pass_deviation_uncertainty_validation(data, serial_number, identifier)
+            print("res", res)
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data":  res})
+        except Exception as e:
+            raise e
         
         
         
-    async def all():
-        data = initial_data()
-        res = alg.summarize_input_values(data)
-        return {"res": res}
+        
+    async def summarize_input_values(self):
+        try:
+            print("SDSDSDSDSDSDSDSDSDSDSDSDSDSDSDSDs")
+            data = initial_data()
+            res = alg.summarize_input_values(data)
+            res = res.reset_index().to_dict(orient="records")
+            print("ressssssssss", res)
+            return JSONResponse(
+                    status_code=200,
+                    content={"success": False, "data":  res})
+        except Exception as e:
+            raise e
         
