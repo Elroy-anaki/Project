@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Response, HTTPException
+from fastapi import APIRouter, Depends, File, Request, Response, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from middleware.database_middleware import get_db 
@@ -143,3 +143,14 @@ async def predict_for_nonexisting_input(serial_number: str, request: Request):
         raise HTTPException(status_code=500, detail="failed featching a measurement")
         
 
+@measurements_router.post("/upload-pdf/{customer_id}")
+async def upload_file(customer_id: int, pdf: UploadFile = File(...), db: Session = Depends(get_db)):
+    try:
+        
+        utils_service = UtilsService()
+        return await utils_service.upload_file(pdf, db, customer_id)
+        
+    except Exception as e:
+        print("error", e)
+        raise HTTPException(status_code=500, detail="failed featching a measurement")
+        

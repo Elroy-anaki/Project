@@ -15,6 +15,7 @@ class DeviceCustomerDal:
             self.db.add(new_device_customer)
             self.db.commit()
             self.db.refresh(new_device_customer)
+            print("Created!!!!!!!")
             return new_device_customer.to_json()
         except Exception as e:
             print("error", e)

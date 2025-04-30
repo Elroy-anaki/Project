@@ -1,17 +1,63 @@
 import React, { useContext, useMemo, useState } from "react";
 import { Table } from "../Table/Table";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { AuthContext } from "../../contexts/authContext";
 import { SharedContext } from "../../contexts/sharedContext";
 
 function Dashboard() {
+
+  const queryClient = useQueryClient();
   const { customer } = useContext(AuthContext);
   const {
     setSerialNumber,
     getAllInputValuesBySerialNumber,
     gtAllIdentifiersBySerialNumber,
+    setMesToAdd
   } = useContext(SharedContext);
+  
+
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      console.log("File selected:", selectedFile); // הדפסת הקובץ שנבחר
+    } else {
+      console.log("No file selected");
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      console.error("No file selected to upload");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("pdf", file);
+
+    try {
+      console.log("Uploading file..."); // הודעה לפני העלאה
+      const response = await axios.post(`/measurements/upload-pdf/${customer.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Response:", response.data); 
+      queryClient.invalidateQueries({queryKey: ["getDevicesCustomers"]})
+      setSerialNumber(response.data.data.first_page['Serial Number']) 
+      document.getElementById("add-measurement").showModal();
+      console.log("serialNumber:", response.data.data.first_page['Serial Number']);
+      const mesTo = response.data.data.measurements[0]
+      mesTo["comments"] = {value: response.data.data.first_page['Calibration Certificate No']}
+      setMesToAdd(mesTo)
+
+    } catch (error) {
+      console.error("Error uploading file:", error); 
+    }
+  };
 
   const { data: devices, isLoading } = useQuery({
     queryKey: ["getDevicesCustomers"],
@@ -63,7 +109,6 @@ function Dashboard() {
 
           const handleActionChange = (e) => {
             const action = e.target.value;
-            setSerialNumber(row.serialNumber);
 
             switch (action) {
               case "view":
@@ -106,14 +151,14 @@ function Dashboard() {
                 gtAllIdentifiersBySerialNumber(row.serialNumber);
                 document.getElementById("validation").showModal();
                 break;
-              
+
               default:
                 break;
             }
           };
 
           return (
-            <div className="flex justify-center">
+            <div className="flex justify-between">
               <select
                 defaultValue=""
                 onChange={handleActionChange}
@@ -122,7 +167,6 @@ function Dashboard() {
                 <option value="" disabled>
                   Select Action
                 </option>
-                <option value="view">View</option>
                 <option value="prediction">Prediction</option>
                 <option value="uncertainty">Uncertainty</option>
                 <option value="calibrationInterval">
@@ -139,6 +183,16 @@ function Dashboard() {
                 </option>
                 <option value="validation">Validation</option>
               </select>
+              <button
+                value="view"
+                onClick={() => {
+                  setSerialNumber(row.serialNumber);
+                  document.getElementById("add-measurement").showModal();
+                }}
+                className="border border-cyan-700 rounded-lg px-4 py-2 bg-white text-cyan-700 font-semibold hover:bg-cyan-700 hover:text-white transition"
+              >
+                View
+              </button>
             </div>
           );
         },
@@ -152,25 +206,55 @@ function Dashboard() {
   return (
     <>
       <div className="mx-8">
-        <div className="flex justify-end gap-4 items-center mb-4">
-          <h3 className="text-xl font-bold ">Choose a Device</h3>
-          <button
-            className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
-            onClick={() =>
-              document.getElementById("add-device-customer").showModal()
-            }
-          >
-            Add New Device +
-          </button>
-          <button
-            className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
-            onClick={() =>
-              document.getElementById("summarize").showModal()
-            }
-          >
-            Overview Data
-          </button>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold">Choose a Device</h3>
+          <div className="flex gap-4">
+            <button
+              className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
+              onClick={() =>
+                document.getElementById("add-device-customer").showModal()
+              }
+            >
+              Add New Device +
+            </button>
+            <button
+              className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
+              onClick={() => document.getElementById("summarize").showModal()}
+            >
+              Overview Data
+            </button>
+            <div className="">
+              {/* Custom label for file input */}
+              <label
+                htmlFor="file-upload"
+                className="inline-block px-6 py-3 bg-green-600 text-white rounded-l-lg cursor-pointer hover:bg-green-500 border-2 border-white"
+              >
+                Choose PDF File
+              </label>
+
+              {/* Hidden file input */}
+              <input
+                type="file"
+                id="file-upload"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                onClick={handleUpload}
+                className="inline-block px-6 py-3 bg-green-600 text-white rounded-r-lg cursor-pointer hover:bg-green-500"
+              >
+                Upload
+              </button>
+              {/* Display file name if uploaded */}
+              {file && (
+                <p className="mt-2 text-lg">Selected File: {file.name}</p>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* Table component remains unchanged */}
         <Table columns={columns} data={data} />
       </div>
     </>

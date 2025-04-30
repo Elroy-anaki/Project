@@ -1,12 +1,15 @@
+import os
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from middleware.database_middleware import initial_data
+from dal.device_customer_dal import DeviceCustomerDal
 import utils.alg as alg
 import json
 
 
 
-
+def format_dict_to_string(data: dict) -> str:
+    return ", ".join(f"{key} - {value}" for key, value in data.items())
 class UtilsService:
 
     def predict_calibration_by_serial_number_and_input(self, serial_number: str,input_value: float):
@@ -115,14 +118,46 @@ class UtilsService:
         
     async def summarize_input_values(self):
         try:
-            print("SDSDSDSDSDSDSDSDSDSDSDSDSDSDSDSDs")
             data = initial_data()
             res = alg.summarize_input_values(data)
             res = res.reset_index().to_dict(orient="records")
-            print("ressssssssss", res)
             return JSONResponse(
                     status_code=200,
                     content={"success": False, "data":  res})
         except Exception as e:
             raise e
+        
+        
+    async def upload_file(self, pdf, db, customer_id):
+        try:
+            file_location = "תעודת כיול.pdf"
+            
+            with open(file_location, "wb") as f:
+                f.write(await pdf.read())
+        
+            res = alg.extract_certificate_data(file_location, "output.json")
+            print(res["first_page"]["Instrument"])
+            print(res["first_page"]["Serial Number"])
+            print(res["second_page"])
+            features = format_dict_to_string(res["second_page"])
+            print(features)
+            device_customer_details = {
+                "serial_number": res["first_page"]["Serial Number"], 
+                "device_name": res["first_page"]["Instrument"],
+                "device_features": features,
+                "customer_id": customer_id
+                
+            }
+            print("device_customer_details", device_customer_details)
+            print("customer_id", type(customer_id))
+            Device_customer_dal = DeviceCustomerDal(db)
+            await Device_customer_dal.create_device_customer(device_customer_details)
+        
+            os.remove(file_location)
+            return JSONResponse(
+                    status_code=200,
+                    content={"success": False, "data":  res})
+        except Exception as e:
+            raise e
+        
         

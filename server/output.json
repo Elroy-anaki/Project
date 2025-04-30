@@ -1,0 +1,111 @@
+{
+    "first_page": {
+        "Calibration Certificate No": "2409",
+        "Work No": "240007020",
+        "Instrument": "Torque Wrench ",
+        "Date of Issue": "22/09/2024",
+        "Serial Number": "RAB87U-28",
+        "Date Received": "22/09/2024",
+        "Date of Calibration": "22/09/2024"
+    },
+    "second_page": {
+        "Measurement range of device": "5",
+        "Resolution": "0.2",
+        "Measurement units": "Nm",
+        "Type": "Setting Tool",
+        "Class": "D",
+        "Standard Reference": "ISO 6789"
+    },
+    "measurements": [
+        {
+            "Uncertainty": {
+                "value": "0.0070",
+                "unit": "Nm"
+            },
+            "Min Value": {
+                "value": "0.752",
+                "unit": "Nm"
+            },
+            "Max Value": {
+                "value": "0.757",
+                "unit": "Nm"
+            },
+            "Permissible deviation": {
+                "value": "6.00",
+                "unit": "O.R%"
+            },
+            "Deviation": {
+                "value": "5.75-",
+                "unit": "O.R%"
+            },
+            "Applied torque": {
+                "value": "0.754",
+                "unit": "Nm"
+            },
+            "Nominal torque": {
+                "value": "0.800",
+                "unit": "Nm"
+            }
+        },
+        {
+            "Uncertainty": {
+                "value": "0.047",
+                "unit": "Nm"
+            },
+            "Min Value": {
+                "value": "2.896",
+                "unit": "Nm"
+            },
+            "Max Value": {
+                "value": "2.922",
+                "unit": "Nm"
+            },
+            "Permissible deviation": {
+                "value": "6.00",
+                "unit": "O.R%"
+            },
+            "Deviation": {
+                "value": "2.97-",
+                "unit": "O.R%"
+            },
+            "Applied torque": {
+                "value": "2.911",
+                "unit": "Nm"
+            },
+            "Nominal torque": {
+                "value": "3.000",
+                "unit": "Nm"
+            }
+        },
+        {
+            "Uncertainty": {
+                "value": "0.047",
+                "unit": "Nm"
+            },
+            "Min Value": {
+                "value": "5.201",
+                "unit": "Nm"
+            },
+            "Max Value": {
+                "value": "5.216",
+                "unit": "Nm"
+            },
+            "Permissible deviation": {
+                "value": "6.00",
+                "unit": "O.R%"
+            },
+            "Deviation": {
+                "value": "4.16",
+                "unit": "O.R%"
+            },
+            "Applied torque": {
+                "value": "5.208",
+                "unit": "Nm"
+            },
+            "Nominal torque": {
+                "value": "5.000",
+                "unit": "Nm"
+            }
+        }
+    ]
+}

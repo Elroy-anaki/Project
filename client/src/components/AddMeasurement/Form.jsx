@@ -1,20 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Input } from "../ui/Input/Input";
+import { SharedContext } from "../../contexts/sharedContext";
 
 function Form({ serialNumber, onChange }) {
+  const {mesToAdd, setMesToAdd} = useContext(SharedContext)
+  console.log(mesToAdd)
   return (
     <>
       <div className="space-y-3">
-        {/* <div>
-          <Input
-            id={"serial_number"}
-            name={"serial_number"}
-            placeholder={serialNumber}
-            type={"text"}
-            value={serialNumber}
-            onChange={onChange}
-          />
-        </div> */}
 
         <div className="">
           <Input
@@ -34,6 +27,8 @@ function Form({ serialNumber, onChange }) {
               id={"input_value"}
               placeholder={"Input"}
               onChange={onChange}
+              value={mesToAdd && mesToAdd["Nominal torque"] ? mesToAdd["Nominal torque"].value : ""}
+
             />
           </div>
           <div>
@@ -44,7 +39,8 @@ function Form({ serialNumber, onChange }) {
               id={"output_value"}
               placeholder={"Output"}
               onChange={onChange}
-            />
+              value={mesToAdd && mesToAdd["Applied torque"] ? mesToAdd["Applied torque"].value : ""}
+              />
           </div>
           <div>
             <Input
@@ -65,7 +61,8 @@ function Form({ serialNumber, onChange }) {
               id={"deviation"}
               placeholder={"Deviation"}
               onChange={onChange}
-            />
+              value={mesToAdd && mesToAdd["Permissible deviation"] ? mesToAdd["Permissible deviation"].value : ""}
+              />
           </div>
           <div>
             <Input
@@ -75,7 +72,8 @@ function Form({ serialNumber, onChange }) {
               id={"tolerance"}
               placeholder={"Tolerance"}
               onChange={onChange}
-            />
+              value={mesToAdd && mesToAdd["Permissible deviation"] ? mesToAdd["Permissible deviation"].value : ""}
+              />
           </div>
           <div>
             <Input
@@ -84,7 +82,7 @@ function Form({ serialNumber, onChange }) {
               placeholder={"Unit2"}
               type={"text"}
               onChange={onChange}
-            />
+              />
           </div>
         </div>
         <div className="flex justify-center items-center">
@@ -97,7 +95,8 @@ function Form({ serialNumber, onChange }) {
             id={"uncertainty"}
             placeholder={"Uncertainty"}
             onChange={onChange}
-          />
+            value={mesToAdd && mesToAdd["Uncertainty"] ? mesToAdd["Uncertainty"].value : ""}
+            />
         </div>
         <div>
           <Input
@@ -106,7 +105,7 @@ function Form({ serialNumber, onChange }) {
             placeholder={"Unit3"}
             type={"text"}
             onChange={onChange}
-          />
+            />
         </div>
         <div>
           <Input
@@ -116,6 +115,7 @@ function Form({ serialNumber, onChange }) {
             id={"threshold"}
             placeholder={"Threshold"}
             onChange={onChange}
+            value={mesToAdd && mesToAdd["Permissible deviation"] ? mesToAdd["Permissible deviation"].value : ""}
           />
         </div>
         </div>
@@ -137,7 +137,7 @@ function Form({ serialNumber, onChange }) {
             id={"status"}
             placeholder={"Status"}
             onChange={onChange}
-          />
+            />
         </div>
         <Input
           id={"comments"}
@@ -145,6 +145,7 @@ function Form({ serialNumber, onChange }) {
           placeholder={"Comments"}
           type={"text"}
           onChange={onChange}
+          value={mesToAdd && mesToAdd["comments"] ? mesToAdd["comments"].value : ""}
         />
       </div>
     </>
