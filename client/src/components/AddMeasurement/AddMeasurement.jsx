@@ -7,9 +7,8 @@ import { Table } from "../Table/Table";
 
 // measurements
 function AddMeasurement() {
-  const [addMeasurementDetails, setAddMeasurementDetails] = useState({});
   const [measurements, setMeasurements] = useState([]);
-  const { serialNumber } = useContext(SharedContext);
+  const { serialNumber, mesToAdd, addMeasurementDetails, setAddMeasurementDetails, counterMes, setCounterMes } = useContext(SharedContext);
 
   const queryClient = useQueryClient();
 
@@ -22,7 +21,10 @@ function AddMeasurement() {
 
   const { mutate: addMeasurement } = useMutation({
     mutationKey: ["addMeasurement"],
-    mutationFn: async (data) => await axios.post("measurements/", data),
+    mutationFn: async (data) => {
+      console.log("mesToAdd", mesToAdd)
+      await axios.post("measurements/", data)
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getMeasurements"] }),
     onError: () => alert("something get wrong!"),
   });
@@ -133,10 +135,36 @@ function AddMeasurement() {
                   method="dialog"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    addMeasurementDetails.serial_number = serialNumber;
-                    console.log("addMeasurementDetails", addMeasurementDetails);
-                    addMeasurement(addMeasurementDetails);
-                    // document.getElementById("close-modal-mes").click();
+                  
+                  
+                    // שלב 1: מפה את mesToAdd לשדות הפלט
+                    const mesToAddParsed = {
+                      input_value: mesToAdd[counterMes]["Nominal torque"].value || "",
+                      output_value: mesToAdd[counterMes]["Applied torque"].value || "",
+                      deviation: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                      tolerance: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                      uncertainty: mesToAdd[counterMes]["Uncertainty"].value || "",
+                      comments: mesToAdd[counterMes]["comments"].value || "",
+                      threshold: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                      // אפשר להוסיף עוד שדות לפי הצורך
+                    };
+                  
+                    // שלב 2: מאחד את הנתונים של הטופס עם mesToAdd
+                    const fullMeasurement = {
+                      ...addMeasurementDetails,
+                      ...mesToAddParsed,
+                      serial_number: serialNumber,
+                    };
+                  
+                    console.log("fullMeasurement", fullMeasurement);
+                    addMeasurement(fullMeasurement);
+                    if(mesToAdd.length > counterMes && counterMes !== mesToAdd.length - 1) {
+                      setCounterMes(counterMes + 1);
+                      
+                    }
+                    if(counterMes === mesToAdd.length - 1){
+                      document.getElementById("add-measurement").close()
+                    }
                   }}
                 >
                   <Form onChange={handelChange} serialNumber={serialNumber} />

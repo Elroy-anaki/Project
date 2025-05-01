@@ -9,6 +9,10 @@ export function SharedProvider({ children }) {
     const [serialNumber, setSerialNumber] = useState("")
     const [inputValues, setInputValues] = useState([])
     const [identifiers, setIdentifiers] = useState([])
+    const [mesToAdd, setMesToAdd] = useState(null)
+    const [counterMes, setCounterMes] = useState(0)
+    const [addMeasurementDetails, setAddMeasurementDetails] = useState({});
+    
     
 
     const {mutate: getAllInputValuesBySerialNumber} = useMutation({
@@ -40,7 +44,13 @@ export function SharedProvider({ children }) {
         setInputValues,
         getAllInputValuesBySerialNumber,
         gtAllIdentifiersBySerialNumber,
-        identifiers
+        identifiers,
+        mesToAdd,
+        setMesToAdd,
+        addMeasurementDetails,
+        setAddMeasurementDetails,
+        counterMes,
+        setCounterMes
         
     }
 

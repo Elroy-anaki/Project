@@ -8,6 +8,10 @@ from datetime import datetime
 import io
 import base64
 import traceback
+import pdfplumber
+import logging
+import re
+import json
 
 
 
@@ -679,6 +683,111 @@ def merge_with_amit_example_data(data):
     data = pd.concat((example_data, data))
     return data
 
+def extract_certificate_data(pdf_path: str, json_path: str = "output.json") -> dict:
+    """
+    Parse a two‑page calibration PDF and write the results to JSON.
+
+    Args:
+        pdf_path:        Path to the input PDF.
+        json_path:       Path where output JSON should be written.
+
+    Returns:
+        A dict with keys:
+          - "first_page":    { field_name: value, ... }
+          - "second_page":   { label: value, ... }
+          - "measurements":  [ { column: { "value": ..., "unit": ... }, ... }, ... ]
+    """
+    def remove_hebrew(text: str) -> str:
+        # strip all Hebrew letters U+0590–U+05FF
+        cleaned = re.sub(r'[\u0590-\u05FF]+', '', text or "")
+        return " ".join(cleaned.split())
+
+    # --- PAGE 1 FIELD PATTERNS ---
+    FIELD_PATTERNS = {
+        "Calibration Certificate No": r'(?i)Calibration Certificate.*?(\d+)',
+        "Work No":                    r'(?i)Work No.*?(\d+)',
+        "Instrument":                 r'(?i)\bInstrument\(IUT\)[^:]*:\s*([^:\r\n]+)',
+        "Date of Issue":              r'(?i)Date of Issue.*?(\d{2}/\d{2}/\d{4})',
+        "Serial Number":              r'(?i)Serial Number.*?:\s*([\w\-/\\]+)',
+        "Date Received":              r'(?i)Date Received.*?(\d{2}/\d{2}/\d{4})',
+        "Date of Calibration":        r'(?i)Date of Calibration.*?(\d{2}/\d{2}/\d{4})'
+    }
+
+    # --- PAGE 2 LABELS & PATTERN ---
+    SECOND_PAGE_LABELS = [
+        "Measurement range of device",
+        "Resolution",
+        "Measurement units",
+        "Type",
+        "Class",
+        "Standard Reference"
+    ]
+    LABEL_MAP = {lbl.lower(): lbl for lbl in SECOND_PAGE_LABELS}
+    group = "|".join(re.escape(lbl) for lbl in SECOND_PAGE_LABELS)
+    SECOND_PAGE_PATTERN = rf'(?i)({group})\s*(.*?)(?={group}|$)'
+
+    with pdfplumber.open(pdf_path) as pdf:
+        # 1) First page
+        text1 = remove_hebrew(pdf.pages[0].extract_text() or "")
+        data_first = {}
+        for fld, pat in FIELD_PATTERNS.items():
+            m = re.search(pat, text1, flags=re.DOTALL)
+            if m:
+                val = remove_hebrew(m.group(1).strip()).replace("\\", "")
+                data_first[fld] = val
+
+        # 2) Second page above table
+        if len(pdf.pages) < 2:
+            raise RuntimeError("PDF has no second page")
+        text2 = remove_hebrew(pdf.pages[1].extract_text() or "")
+        data_second = {}
+        for lbl, val in re.findall(SECOND_PAGE_PATTERN, text2, flags=re.DOTALL):
+            canon = LABEL_MAP[lbl.lower().strip()]
+            v = val.strip().replace("\\", "")
+            if canon == "Standard Reference":
+                v = re.split(
+                    r'(?i)\b(Clockwise|Conclusions?|Uncertainty|Min|Value|Deviation|Max|Permissible|Applied|Nominal|torque)\b',
+                    v
+                )[0].strip()
+            data_second[canon] = v
+
+        # 3) Table on page 2
+        tables = pdf.pages[1].extract_tables()
+        if not tables:
+            raise RuntimeError("No tables found on second page")
+        table = max(tables, key=lambda t: len(t[0]) if t and t[0] else 0)
+        headers = [remove_hebrew(h or "") for h in table[0]]
+
+        # units row, forward‑fill
+        raw_units = [u or "" for u in table[1]]
+        units, last = [], ""
+        for u in raw_units:
+            if u.strip():
+                last = remove_hebrew(u)
+            units.append(last)
+
+        measurements = []
+        for row in table[2:]:
+            entry = {}
+            for i, hdr in enumerate(headers):
+                val = row[i] if i < len(row) else ""
+                v = remove_hebrew(val).replace("\\", "").strip()
+                if v:
+                    entry[hdr] = {"value": v, "unit": units[i]}
+            if entry:
+                measurements.append(entry)
+
+    # assemble and write JSON
+    output = {
+        "first_page":   data_first,
+        "second_page":  data_second,
+        "measurements": measurements
+    }
+    with open(json_path, "w", encoding="utf-8") as jf:
+        json.dump(output, jf, ensure_ascii=False, indent=4)
+
+    return output
+
 
 def main(data_path):
 
@@ -741,6 +850,8 @@ def main(data_path):
     res = predict_for_nonexistent_input_value(data, serial_number, identifier, query_date, query_input_value=68, k=6, to_plot=True)
 
 if __name__ == "__main__":
-    data_path = "data.csv"
+    # data_path = "data.csv"
     # code to execute when the script is run directly
-    main(data_path)
+    # main(data_path)result = extract_certificate_data("תעודת כיול.pdf", "output.json")
+    result = extract_certificate_data("תעודת כיול.pdf", "output.json")
+    print(json.dumps(result, ensure_ascii=False))

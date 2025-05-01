@@ -53,6 +53,7 @@ export function AddDeviceCustomer() {
               onSubmit={(e) => {
                 e.preventDefault();
                 deviceCustomerDetails.customer_id = customer.id
+                return console.log(deviceCustomerDetails)
                 createDeviceCustomer(deviceCustomerDetails);
                 console.log(deviceCustomerDetails)
                 document.getElementById("close-modal").click()
