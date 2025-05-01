@@ -142,7 +142,7 @@ class UtilsService:
             features = format_dict_to_string(res["second_page"])
             print(features)
             device_customer_details = {
-                "serial_number": res["first_page"]["Serial Number"], 
+                "serial_number": "123456789", 
                 "device_name": res["first_page"]["Instrument"],
                 "device_features": features,
                 "customer_id": customer_id

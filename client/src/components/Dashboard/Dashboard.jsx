@@ -6,16 +6,14 @@ import { AuthContext } from "../../contexts/authContext";
 import { SharedContext } from "../../contexts/sharedContext";
 
 function Dashboard() {
-
   const queryClient = useQueryClient();
   const { customer } = useContext(AuthContext);
   const {
     setSerialNumber,
     getAllInputValuesBySerialNumber,
     gtAllIdentifiersBySerialNumber,
-    setMesToAdd
+    setMesToAdd,
   } = useContext(SharedContext);
-  
 
   const [file, setFile] = useState(null);
 
@@ -40,22 +38,36 @@ function Dashboard() {
 
     try {
       console.log("Uploading file..."); // הודעה לפני העלאה
-      const response = await axios.post(`/measurements/upload-pdf/${customer.id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("Response:", response.data); 
-      queryClient.invalidateQueries({queryKey: ["getDevicesCustomers"]})
-      setSerialNumber(response.data.data.first_page['Serial Number']) 
+      const response = await axios.post(
+        `/measurements/upload-pdf/${customer.id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Response:", response.data);
+      queryClient.invalidateQueries({ queryKey: ["getDevicesCustomers"] });
+      // setSerialNumber(response.data.data.first_page['Serial Number'])
+      setSerialNumber("12345");
       document.getElementById("add-measurement").showModal();
-      console.log("serialNumber:", response.data.data.first_page['Serial Number']);
-      const mesTo = response.data.data.measurements[0]
-      mesTo["comments"] = {value: response.data.data.first_page['Calibration Certificate No']}
-      setMesToAdd(mesTo)
-
+      console.log(
+        "serialNumber:",
+        response.data.data.first_page["Serial Number"]
+      );
+      const mesTo = response.data.data.measurements;
+      const mess = mesTo.map((mes) => ({
+        ...mes,
+        comments: {
+          value: response.data.data.first_page["Calibration Certificate No"],
+        },
+      }));
+      console.log("mess", mess);
+      // mesTo["comments"] = {value: response.data.data.first_page['Calibration Certificate No']}
+      setMesToAdd(mess);
     } catch (error) {
-      console.error("Error uploading file:", error); 
+      console.error("Error uploading file:", error);
     }
   };
 
@@ -208,31 +220,32 @@ function Dashboard() {
       <div className="mx-8">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Choose a Device</h3>
-          <div className="flex gap-4">
+          <div className="flex gap-3 flex-wrap">
             <button
-              className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
+              className="h-12 min-w-[150px] text-white px-5 text-base bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
               onClick={() =>
                 document.getElementById("add-device-customer").showModal()
               }
             >
               Add New Device +
             </button>
+
             <button
-              className="text-white px-3 py-1.5 bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
+              className="h-12 min-w-[150px] text-white px-5 text-base bg-cyan-700 font-semibold rounded-lg cursor-pointer hover:bg-cyan-600"
               onClick={() => document.getElementById("summarize").showModal()}
             >
               Overview Data
             </button>
-            <div className="">
-              {/* Custom label for file input */}
+
+            {/* File input group */}
+            <div className="flex">
               <label
                 htmlFor="file-upload"
-                className="inline-block px-6 py-3 bg-green-600 text-white rounded-l-lg cursor-pointer hover:bg-green-500 border-2 border-white"
+                className="h-12 min-w-[150px] flex items-center justify-center px-5 text-base bg-green-600 text-white rounded-l-lg cursor-pointer hover:bg-green-500 border-2 border-white whitespace-nowrap"
               >
                 Choose PDF File
               </label>
 
-              {/* Hidden file input */}
               <input
                 type="file"
                 id="file-upload"
@@ -240,21 +253,18 @@ function Dashboard() {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <button
+              {file && <button
                 onClick={handleUpload}
-                className="inline-block px-6 py-3 bg-green-600 text-white rounded-r-lg cursor-pointer hover:bg-green-500"
+                className="h-11.5 min-w-[150px] px-5 text-base bg-green-600 text-white rounded-r-lg cursor-pointer hover:bg-green-500 flex items-center justify-center overflow-hidden whitespace-nowrap"
               >
-                Upload
-              </button>
-              {/* Display file name if uploaded */}
-              {file && (
-                <p className="mt-2 text-lg">Selected File: {file.name}</p>
-              )}
+                {file.name}
+              </button>}
+              
             </div>
           </div>
         </div>
 
-        {/* Table component remains unchanged */}
+        {/* Table remains unchanged */}
         <Table columns={columns} data={data} />
       </div>
     </>

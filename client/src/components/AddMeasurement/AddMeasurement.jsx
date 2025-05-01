@@ -8,7 +8,7 @@ import { Table } from "../Table/Table";
 // measurements
 function AddMeasurement() {
   const [measurements, setMeasurements] = useState([]);
-  const { serialNumber, mesToAdd, addMeasurementDetails, setAddMeasurementDetails } = useContext(SharedContext);
+  const { serialNumber, mesToAdd, addMeasurementDetails, setAddMeasurementDetails, counterMes, setCounterMes } = useContext(SharedContext);
 
   const queryClient = useQueryClient();
 
@@ -136,14 +136,16 @@ function AddMeasurement() {
                   onSubmit={(e) => {
                     e.preventDefault();
                   
+                  
                     // שלב 1: מפה את mesToAdd לשדות הפלט
                     const mesToAddParsed = {
-                      input_value: mesToAdd?.["Nominal torque"]?.value || "",
-                      output_value: mesToAdd?.["Applied torque"]?.value || "",
-                      deviation: mesToAdd?.["Permissible deviation"]?.value || "",
-                      tolerance: mesToAdd?.["Permissible deviation"]?.value || "",
-                      uncertainty: mesToAdd?.["Uncertainty"]?.value || "",
-                      comments: mesToAdd?.["comments"]?.value || "",
+                      input_value: mesToAdd[counterMes]["Nominal torque"].value || "",
+                      output_value: mesToAdd[counterMes]["Applied torque"].value || "",
+                      deviation: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                      tolerance: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                      uncertainty: mesToAdd[counterMes]["Uncertainty"].value || "",
+                      comments: mesToAdd[counterMes]["comments"].value || "",
+                      threshold: mesToAdd[counterMes]["Permissible deviation"].value || "",
                       // אפשר להוסיף עוד שדות לפי הצורך
                     };
                   
@@ -156,6 +158,13 @@ function AddMeasurement() {
                   
                     console.log("fullMeasurement", fullMeasurement);
                     addMeasurement(fullMeasurement);
+                    if(mesToAdd.length > counterMes && counterMes !== mesToAdd.length - 1) {
+                      setCounterMes(counterMes + 1);
+                      
+                    }
+                    if(counterMes === mesToAdd.length - 1){
+                      document.getElementById("add-measurement").close()
+                    }
                   }}
                 >
                   <Form onChange={handelChange} serialNumber={serialNumber} />

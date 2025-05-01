@@ -10,6 +10,7 @@ export function SharedProvider({ children }) {
     const [inputValues, setInputValues] = useState([])
     const [identifiers, setIdentifiers] = useState([])
     const [mesToAdd, setMesToAdd] = useState(null)
+    const [counterMes, setCounterMes] = useState(0)
     const [addMeasurementDetails, setAddMeasurementDetails] = useState({});
     
     
@@ -47,7 +48,9 @@ export function SharedProvider({ children }) {
         mesToAdd,
         setMesToAdd,
         addMeasurementDetails,
-        setAddMeasurementDetails
+        setAddMeasurementDetails,
+        counterMes,
+        setCounterMes
         
     }
 
