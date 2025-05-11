@@ -13,6 +13,7 @@ function Dashboard() {
     getAllInputValuesBySerialNumber,
     gtAllIdentifiersBySerialNumber,
     setMesToAdd,
+    serialNumber,
   } = useContext(SharedContext);
 
   const [file, setFile] = useState(null);
@@ -50,7 +51,7 @@ function Dashboard() {
       console.log("Response:", response.data);
       queryClient.invalidateQueries({ queryKey: ["getDevicesCustomers"] });
       // setSerialNumber(response.data.data.first_page['Serial Number'])
-      setSerialNumber("12345");
+      setSerialNumber(response.data.data.first_page["Serial Number"]);
       document.getElementById("add-measurement").showModal();
       console.log(
         "serialNumber:",
@@ -121,6 +122,7 @@ function Dashboard() {
 
           const handleActionChange = (e) => {
             const action = e.target.value;
+            setSerialNumber(row.serialNumber);
 
             switch (action) {
               case "view":
@@ -136,6 +138,8 @@ function Dashboard() {
                 document.getElementById("uncertainty-modal").showModal();
                 break;
               case "calibrationInterval":
+                getAllInputValuesBySerialNumber(row.serialNumber);
+                gtAllIdentifiersBySerialNumber(row.serialNumber);
                 document.getElementById("calibration-interval").showModal();
                 break;
               case "writeCertificate":
@@ -170,7 +174,7 @@ function Dashboard() {
           };
 
           return (
-            <div className="flex justify-between">
+            <div className="flex justify-center gap-2">
               <select
                 defaultValue=""
                 onChange={handleActionChange}
@@ -215,6 +219,9 @@ function Dashboard() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+ console.log("serialNumber:", serialNumber);
+
   return (
     <>
       <div className="mx-8">

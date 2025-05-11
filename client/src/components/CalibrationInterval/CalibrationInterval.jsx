@@ -109,13 +109,16 @@ function CalibrationInterval() {
                   >
                     Choose Risk Factor
                   </label>
-                  <input
-                    type="number"
-                    name="risk_factor"
+                  <select
                     id="risk_factor"
+                    name="risk_factor"
                     onChange={(e) => setChosenRiskFactor(e.target.value)}
                     className="w-full text-black p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  />
+                  >
+                    <option value="">בחר גורם סיכון</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                  </select>
                 </div>
               </div>
 
@@ -129,7 +132,12 @@ function CalibrationInterval() {
                   console.log("data to sent", data);
                   findCalibrationInterval(data);
                 }}
-                className="w-fit mt-6 px-8 py-3 bg-cyan-700 text-white text-lg rounded-xl font-semibold hover:bg-cyan-800 transition"
+                disabled={!chosenInputValue || !chosenIdentifier || !chosenRiskFactor}
+                className={`w-fit mt-6 px-8 py-3 text-white text-lg rounded-xl font-semibold transition ${
+                  !chosenInputValue || !chosenIdentifier || !chosenRiskFactor
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-cyan-700 hover:bg-cyan-800"
+                }`}
               >
                 Calibration Interval
               </button>
@@ -141,7 +149,7 @@ function CalibrationInterval() {
                     Result
                   </h2>
                   <div className="">
-                    <h2 className="text-center">{Number(result).toFixed(3)}</h2>
+                    <h2 className="text-center">{Number(result).toFixed(3)} years</h2>
                   </div>
                 </div>
               )}

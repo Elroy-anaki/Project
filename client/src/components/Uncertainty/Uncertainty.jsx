@@ -29,7 +29,9 @@ function Uncertainty() {
             id="close-modal-mes"
             type="button"
             className="absolute top-4 right-4 rounded-full cursor-pointer p-2 bg-rose-500 text-white font-bold hover:bg-rose-600 transition"
-            onClick={() => document.getElementById("uncertainty-modal").close()}
+            onClick={() => {
+              setResult(null)
+              document.getElementById("uncertainty-modal").close()}}
           >
             ✕
           </button>
@@ -50,7 +52,7 @@ function Uncertainty() {
                   onChange={(e) => setChosenInputValue(e.target.value)}
                   value={chosenInputValue}
                 >
-                  <option value="">Select value</option>
+                  <option selected>Select value</option>
                   {inputValues.length > 0 ? (
                     inputValues.map((inputValue, index) => (
                       <option key={index} value={inputValue}>
@@ -74,7 +76,7 @@ function Uncertainty() {
                   onChange={(e) => setChosenIdentifier(e.target.value)}
                   value={chosenIdentifier}
                 >
-                  <option value="">Select identifier</option>
+                  <option selected>Select identifier</option>
                   {identifiers.length > 0 && identifiers[0] !== null ? (
                     identifiers.map((identifier, index) => {
                       if (identifier !== "") {
@@ -121,7 +123,12 @@ function Uncertainty() {
                 console.log("data to sent", data);
                 predictUncertaintyBySerialNumber(data);
               }}
-              className="w-fit mt-6 px-8 py-3 bg-cyan-700 text-white text-lg rounded-xl font-semibold hover:bg-cyan-800 transition"
+              disabled={!chosenInputValue || !chosenIdentifier || !chosenDate}
+              className={`w-fit mt-6 px-8 py-3 text-white text-lg rounded-xl font-semibold transition ${
+                !chosenInputValue || !chosenIdentifier || !chosenDate
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-cyan-700 hover:bg-cyan-800"
+              }`}
             >
               Predict Uncertainty
             </button>

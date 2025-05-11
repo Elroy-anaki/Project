@@ -91,7 +91,12 @@ function CompareDeviationsUncertainties() {
                   console.log("data to sent", data);
                   CompareDeviationsUncertainties(data);
                 }}
-                className="w-fit mt-6 px-8 py-3 bg-cyan-700 text-white text-lg rounded-xl font-semibold hover:bg-cyan-800 transition"
+                disabled={!chosenIdentifier}
+                className={`w-fit mt-6 px-8 py-3 text-white text-lg rounded-xl font-semibold transition ${
+                  !chosenIdentifier
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-cyan-700 hover:bg-cyan-800"
+                }`}
               >
                 Compare Deviations Uncertainties
               </button>

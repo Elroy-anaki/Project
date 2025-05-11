@@ -6,13 +6,63 @@ import axios from "axios";
 
 export function SingUp() {
   const [customerDetails, setCustomerDetails] = useState({});
-  const [msg, setMsg] = useState("");
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
+
+  const validateName = (name) => {
+    return name.length >= 2;
+  };
+
   const handelChange = (e) => {
+    const { name, value } = e.target;
     setCustomerDetails((prev) => {
-      return { ...prev, [e.target.name]: e.target.value };
+      return { ...prev, [name]: value };
     });
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!customerDetails.customer_name) {
+      newErrors.customer_name = 'שם מלא חובה';
+    } else if (!validateName(customerDetails.customer_name)) {
+      newErrors.customer_name = 'השם חייב להכיל לפחות 2 תווים';
+    }
+
+    if (!customerDetails.customer_email) {
+      newErrors.customer_email = 'מייל חובה';
+    } else if (!validateEmail(customerDetails.customer_email)) {
+      newErrors.customer_email = 'נא להזין כתובת מייל תקינה';
+    }
+
+    if (!customerDetails.customer_password) {
+      newErrors.customer_password = 'סיסמה חובה';
+    } else if (!validatePassword(customerDetails.customer_password)) {
+      newErrors.customer_password = 'הסיסמה חייבת להכיל לפחות 6 תווים';
+    }
+
+    if (!customerDetails.customer_confirm_password) {
+      newErrors.customer_confirm_password = 'אישור סיסמה חובה';
+    } else if (customerDetails.customer_password !== customerDetails.customer_confirm_password) {
+      newErrors.customer_confirm_password = 'הסיסמאות אינן תואמות';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const { mutate: signUp } = useMutation({
@@ -20,20 +70,16 @@ export function SingUp() {
     mutationFn: async (customerDetails) =>
       await axios.post("customers/sign-up", customerDetails),
     onSuccess: (data) => navigate("/login"),
-    onError: (error) => setMsg("Something Get Wrong!"),
+    onError: (error) => {
+      setErrors({ submit: 'ההרשמה נכשלה. נסה שוב מאוחר יותר.' });
+    },
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      customerDetails.customerPassword !==
-      customerDetails.customerConfirmPassword
-    ) {
-      setMsg("The password and confirm password must be identical.");
-      return;
+    if (validateForm()) {
+      signUp(customerDetails);
     }
-    console.log(customerDetails);
-    signUp(customerDetails);
   };
 
   return (
@@ -55,6 +101,9 @@ export function SingUp() {
                 id={"customer_name"}
                 onChange={handelChange}
               />
+              {errors.customer_name && (
+                <p className="text-red-500 text-sm text-right mr-8">{errors.customer_name}</p>
+              )}
             </div>
             <div>
               <Input
@@ -64,6 +113,9 @@ export function SingUp() {
                 id={"customer_email"}
                 onChange={handelChange}
               />
+              {errors.customer_email && (
+                <p className="text-red-500 text-sm text-right mr-8">{errors.customer_email}</p>
+              )}
             </div>
 
             <div>
@@ -74,6 +126,9 @@ export function SingUp() {
                 id={"customer_password"}
                 onChange={handelChange}
               />
+              {errors.customer_password && (
+                <p className="text-red-500 text-sm text-right mr-8">{errors.customer_password}</p>
+              )}
             </div>
             <div>
               <Input
@@ -83,10 +138,13 @@ export function SingUp() {
                 id={"customer_confirm_password"}
                 onChange={handelChange}
               />
+              {errors.customer_confirm_password && (
+                <p className="text-red-500 text-sm text-right mr-8">{errors.customer_confirm_password}</p>
+              )}
             </div>
-            <div>
-              {msg && <p className="text-left ml-8 text-red-500">{msg}</p>}
-            </div>
+            {errors.submit && (
+              <p className="text-red-500 text-sm">{errors.submit}</p>
+            )}
             <div>
               <button
                 type="submit"

@@ -8,7 +8,7 @@ import { Table } from "../Table/Table";
 // measurements
 function AddMeasurement() {
   const [measurements, setMeasurements] = useState([]);
-  const { serialNumber, mesToAdd, addMeasurementDetails, setAddMeasurementDetails, counterMes, setCounterMes } = useContext(SharedContext);
+  const { serialNumber, mesToAdd, addMeasurementDetails,setMesToAdd, setAddMeasurementDetails, counterMes, setCounterMes } = useContext(SharedContext);
 
   const queryClient = useQueryClient();
 
@@ -112,7 +112,12 @@ function AddMeasurement() {
             id="close-modal-mes"
             type="button"
             className="absolute top-4 right-4 rounded-xl cursor-pointer px-2 py-1 bg-rose-500 text-white font-bold border-none hover:bg-rose-600 transition"
-            onClick={() => document.getElementById("add-measurement").close()}
+            onClick={() => {
+              setMesToAdd([])
+              setAddMeasurementDetails({})
+              
+              document.getElementById("add-measurement").close()
+            }}
           >
             X
           </button>
@@ -133,36 +138,40 @@ function AddMeasurement() {
               <div className="w-full mt-4">
                 <form
                   method="dialog"
+                  name="add-measurement"
+                  id="add-measurement"
                   onSubmit={(e) => {
                     e.preventDefault();
-                  
-                  
                     // שלב 1: מפה את mesToAdd לשדות הפלט
-                    const mesToAddParsed = {
-                      input_value: mesToAdd[counterMes]["Nominal torque"].value || "",
-                      output_value: mesToAdd[counterMes]["Applied torque"].value || "",
-                      deviation: mesToAdd[counterMes]["Permissible deviation"].value || "",
-                      tolerance: mesToAdd[counterMes]["Permissible deviation"].value || "",
-                      uncertainty: mesToAdd[counterMes]["Uncertainty"].value || "",
-                      comments: mesToAdd[counterMes]["comments"].value || "",
-                      threshold: mesToAdd[counterMes]["Permissible deviation"].value || "",
-                      // אפשר להוסיף עוד שדות לפי הצורך
-                    };
-                  
+                    console.log("mesToAdd", mesToAdd)
+                    let mesToAddParsed;
+                    if (mesToAdd) {
+                      mesToAddParsed = {
+                        input_value: mesToAdd[counterMes]["Nominal torque"]?.value || 0,
+                        output_value: mesToAdd[counterMes]["Applied torque"].value || 0,
+                        deviation: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                        tolerance: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                        uncertainty: mesToAdd[counterMes]["Uncertainty"].value || "",
+                        comments: mesToAdd[counterMes]["comments"].value || "",
+                        threshold: mesToAdd[counterMes]["Permissible deviation"].value || "",
+                        // אפשר להוסיף עוד שדות לפי הצורך
+                      };
+                    }
+
                     // שלב 2: מאחד את הנתונים של הטופס עם mesToAdd
                     const fullMeasurement = {
                       ...addMeasurementDetails,
                       ...mesToAddParsed,
                       serial_number: serialNumber,
                     };
-                  
+
                     console.log("fullMeasurement", fullMeasurement);
                     addMeasurement(fullMeasurement);
-                    if(mesToAdd.length > counterMes && counterMes !== mesToAdd.length - 1) {
+                    if (mesToAdd?.length > counterMes && counterMes !== mesToAdd?.length - 1) {
                       setCounterMes(counterMes + 1);
-                      
                     }
-                    if(counterMes === mesToAdd.length - 1){
+
+                    if (counterMes === mesToAdd.length - 1) {
                       document.getElementById("add-measurement").close()
                     }
                   }}

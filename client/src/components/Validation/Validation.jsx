@@ -93,12 +93,16 @@ function Validation() {
                   onClick={() => {
                     const data = {
                       identifier: chosenIdentifier,
-
                     };
                     console.log("data to send:", data);
                     percentagePassDeviationUncertaintyValidation(data);
                   }}
-                  className="w-fit mt-6 px-8 py-3 bg-cyan-700 text-white text-lg rounded-xl font-semibold hover:bg-cyan-800 transition"
+                  disabled={!chosenIdentifier}
+                  className={`w-fit mt-6 px-8 py-3 text-white text-lg rounded-xl font-semibold transition ${
+                    !chosenIdentifier
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-cyan-700 hover:bg-cyan-800"
+                  }`}
                 >
                   Validation
                 </button>
@@ -114,16 +118,40 @@ function Validation() {
                 {result && !error && (
                   <div className="w-full mt-10 bg-gray-100 p-6 rounded-2xl shadow-lg text-black">
                     <h2 className="text-2xl font-bold mb-4 text-cyan-700">
-                      Prediction Results
+                      measurements results
                     </h2>
-                    <h3 className="text-2xl text-black">{result.predicted_deviation}</h3>
-                    <div className="">
-                  <img
-                    src={`data:image/png;base64,${result.image}`}
-                    alt="Calibration Chart"
-                    className="max-w-full h-[580px] rounded-xl border border-gray-300 shadow-md"
-                  />
-                </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">input value</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">slope</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">intercept</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">real deviation</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">predicted deviation</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">real uncertainty</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">predicted uncertainty</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">En</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">comparison to 1</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {result.map((measurement, index) => (
+                            <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
+                              <td className="px-6 py-4">{measurement.input_value}</td>
+                              <td className="px-6 py-4">{measurement.slope || '-'}</td>
+                              <td className="px-6 py-4">{measurement.intercept || '-'}</td>
+                              <td className="px-6 py-4">{measurement.real_deviation || '-'}</td>
+                              <td className="px-6 py-4">{measurement.predicted_deviation}</td>
+                              <td className="px-6 py-4">{measurement.real_uncertainty}</td>
+                              <td className="px-6 py-4">{measurement.predicted_uncertainty}</td>
+                              <td className="px-6 py-4">{measurement.En}</td>
+                              <td className="px-6 py-4">{measurement.comparison_to_1}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
               </div>

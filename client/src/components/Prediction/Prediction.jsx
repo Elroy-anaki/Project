@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { SharedContext } from "../../contexts/sharedContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
 function Prediction() {
@@ -54,6 +54,9 @@ function Prediction() {
               className="w-full text-black p-3 border border-gray-300 rounded-xl shadow focus:outline-none focus:ring-2 focus:ring-cyan-500"
               onChange={(e) => setChosenInputValue(e.target.value)}
             >
+                 <option selected disabled>
+                    בחר ערך כניסה
+                  </option>
               {inputValues.length > 0 ? (
                 inputValues.map((inputValue, index) => (
                   <option key={index} value={inputValue}>
@@ -67,8 +70,12 @@ function Prediction() {
           </div>
   
           <button
+            disabled={chosenInputValue === ""}
             onClick={prdeict}
-            className="h-fit cursor-pointer mt-2 md:mt-8 px-6 py-3 bg-cyan-700 text-white rounded-xl font-medium hover:bg-cyan-800 transition"
+            className={`h-fit cursor-pointer
+             mt-2 md:mt-8 px-6 py-3 bg-cyan-700 
+             text-white rounded-xl font-medium 
+             hover:bg-cyan-800 transition ${chosenInputValue === "" ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             Predict
           </button>
