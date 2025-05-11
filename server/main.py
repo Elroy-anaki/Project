@@ -5,9 +5,6 @@ from routes.device_customer_routes import device_customer_router
 from routes.measurements_routes import measurements_router
 from middleware.database_middleware import initial_data
 
-
-
-
 app = FastAPI()
 
 origins = [
@@ -30,3 +27,8 @@ app.include_router(measurements_router, prefix="/measurements")
 @app.get("/")
 def read_root():
     return {"message": "Hello FastAPI"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="localhost", port=8000)

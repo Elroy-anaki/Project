@@ -547,9 +547,9 @@ def percentage_pass_deviation_uncertainty_validation(data, serial_number, identi
   results = compare_deviations_uncertainties(data, serial_number, identifier, k)
   
   try:
-    if results.empty:
-      print(f"cannot estimate LOO percentage pass for serial number: {serial_number} and identifier: {identifier} since LOO not applicable for any of its input values")
-      return value2counts, np.nan
+    # if results.empty:
+    #   print(f"cannot estimate LOO percentage pass for serial number: {serial_number} and identifier: {identifier} since LOO not applicable for any of its input values")
+    #   return value2counts, np.nan
     return results
   except Exception as e:
     traceback.print_exc() 

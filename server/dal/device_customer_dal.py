@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, Request, Response, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
@@ -29,6 +28,18 @@ class DeviceCustomerDal:
                 .all()
             )
             return [device.to_json() for device in devices]
+        except Exception as e:
+            print("error", e)
+            raise e
+            
+    async def get_device_by_serial_number(self, serial_number: str):
+        try:
+            device = (
+                self.db.query(DeviceCustomer)
+                .filter(DeviceCustomer.serial_number == serial_number)
+                .first()
+            )
+            return device.to_json() if device else None
         except Exception as e:
             print("error", e)
             raise e

@@ -1,0 +1,13 @@
+sqlalchemy
+fastapi
+bcrypt
+python-jose[cryptography]
+pymysql
+numpy
+pandas
+matplotlib
+scikit-learn
+uvicorn[standard]
+pydantic
+python-multipart
+pdfplumber

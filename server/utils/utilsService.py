@@ -136,27 +136,39 @@ class UtilsService:
                 f.write(await pdf.read())
         
             res = alg.extract_certificate_data(file_location, "output.json")
+
+            print("ressssss", res["measurements"])
             print(res["first_page"]["Instrument"])
             print(res["first_page"]["Serial Number"])
-            print(res["second_page"])
             features = format_dict_to_string(res["second_page"])
             print(features)
             device_customer_details = {
-                "serial_number": "123456789", 
+                "serial_number": res["first_page"]["Serial Number"], 
                 "device_name": res["first_page"]["Instrument"],
                 "device_features": features,
                 "customer_id": customer_id
-                
             }
             print("device_customer_details", device_customer_details)
             print("customer_id", type(customer_id))
             Device_customer_dal = DeviceCustomerDal(db)
-            await Device_customer_dal.create_device_customer(device_customer_details)
-        
-            os.remove(file_location)
-            return JSONResponse(
+            
+            # בדיקה אם המכשיר קיים
+            existing_device = await Device_customer_dal.get_device_by_serial_number(device_customer_details["serial_number"])
+            
+            if existing_device:
+                os.remove(file_location)
+                return JSONResponse(
                     status_code=200,
-                    content={"success": False, "data":  res})
+                    content={"success": False, "data":  res}
+                )
+            else:
+                # אם המכשיר לא קיים, יוצרים אותו
+                new_device = await Device_customer_dal.create_device_customer(device_customer_details)
+                os.remove(file_location)
+                return JSONResponse(
+                    status_code=200,
+                   content={"success": False, "data":  res}
+                )
         except Exception as e:
             raise e
         
