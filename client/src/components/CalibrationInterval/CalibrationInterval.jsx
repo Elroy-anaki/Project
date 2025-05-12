@@ -10,6 +10,7 @@ function CalibrationInterval() {
   const [chosenIdentifier, setChosenIdentifier] = useState("");
   const [chosenRiskFactor, setChosenRiskFactor] = useState(0);
   const [result, setResult] = useState("");
+  const [error, setError] = useState("");
 
   const { mutate: findCalibrationInterval } = useMutation({
     mutationKey: ["findCalibrationInterval"],
@@ -19,7 +20,16 @@ function CalibrationInterval() {
         query
       );
       console.log(data.data);
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log(data);
       setResult(data.data);
+      setError("");
+    }, 
+    onError: (e) => {
+      setError("There are no measurements to predict with.");
+      setResult(null);
     },
   });
   return (
@@ -32,8 +42,11 @@ function CalibrationInterval() {
               id="close-modal-mes"
               type="button"
               className="absolute top-4 right-4 rounded-xl cursor-pointer px-2 py-1 bg-rose-500 text-white font-bold border-none hover:bg-rose-600 transition"
-              onClick={() =>
+              onClick={() =>{
                 document.getElementById("calibration-interval").close()
+                setResult(null)
+                setError(null)
+              }
               }
             >
               X
@@ -141,15 +154,20 @@ function CalibrationInterval() {
               >
                 Calibration Interval
               </button>
-
+              {error && (
+              <div className="w-full mt-10 bg-red-100 p-6 rounded-2xl shadow-lg text-red-700">
+                <h2 className="text-2xl font-bold mb-4">Error</h2>
+                <p className="text-lg">{error}</p>
+              </div>
+            )}
               {/*  Result */}
-              {result && (
+              {result && !error &&(
                 <div className="w-full mt-10 bg-gray-100 p-6 rounded-2xl shadow-lg text-black">
                   <h2 className="text-2xl font-bold mb-4 text-cyan-700">
                     Result
                   </h2>
                   <div className="">
-                    <h2 className="text-center">{Number(result).toFixed(3)} years</h2>
+                  <h2 className="text-center">{Math.abs(Number(result)).toFixed(3)} years</h2>
                   </div>
                 </div>
               )}

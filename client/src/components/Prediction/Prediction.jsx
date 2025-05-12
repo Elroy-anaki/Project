@@ -9,6 +9,7 @@ function Prediction() {
 
   const [chosenInputValue, setChosenInputValue] = useState("");
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
   
   const { mutate: prdeict } = useMutation({
@@ -17,9 +18,17 @@ function Prediction() {
       const { data } = await axios.get(
         `/measurements/${serialNumber}/${chosenInputValue}/predict-calibration`
       );
-      setResult(data.data);
-      console.log(data.data);
+      console.log(data);
       return data;
+    },
+  onSuccess: (data) => {
+      console.log(data);
+      setResult(data.data);
+      setError("");
+    },
+    onError: (e) => {
+      setError("There are no measurements to predict with.");
+      setResult(null);
     },
   });
 
@@ -35,6 +44,7 @@ function Prediction() {
             document.getElementById("prediction").close();
             setInputValues([]);
             setResult(null);
+            setError(null);
           }}
         >
           ✕
@@ -80,6 +90,12 @@ function Prediction() {
             Predict
           </button>
         </div>
+        {error && (
+              <div className="w-full mt-10 bg-red-100 p-6 rounded-2xl shadow-lg text-red-700">
+                <h2 className="text-2xl font-bold mb-4">Error</h2>
+                <p className="text-lg">{error}</p>
+              </div>
+            )}
   
         {result && (
           <>

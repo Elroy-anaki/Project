@@ -10,6 +10,7 @@ function WriteCalibrationCertificate() {
     useContext(SharedContext);
   const [chosenIdentifier, setChosenIdentifier] = useState("");
   const [result, setResult] = useState([]);
+  const [error, setError] = useState("");
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -85,10 +86,21 @@ function WriteCalibrationCertificate() {
         query
       );
       console.log(data.data);
-      return data.data;
+      return data;
     },
-    onSuccess: (data) => {  
-      setResult(data);
+    onSuccess: (data) => {
+      console.log(data);
+      if (data.data.length === 0) {
+        setError("There are no measurements to predict with.");
+        setResult(null);
+        return;
+      }
+      setResult(data.data);
+      setError("");
+    },
+    onError: (e) => {
+      setError("There are no measurements to predict with.");
+      setResult(null);
     },
   });
 
@@ -176,6 +188,7 @@ function WriteCalibrationCertificate() {
                 document.getElementById("write-calibration-certificate").close()
                 setResult(null);
                 setChosenIdentifier("")
+                setError(null);
               }}
             >
               X
@@ -237,9 +250,18 @@ function WriteCalibrationCertificate() {
               >
                 Write Calibration Certificate
               </button>
+              {error && (
+              <div className="w-full mt-10 bg-red-100 p-6 rounded-2xl shadow-lg text-red-700">
+                <h2 className="text-2xl font-bold mb-4">Error</h2>
+                <p className="text-lg">{error}</p>
+              </div>
+            )}
 
               {/* Results */}
-              {renderResults()}
+              {result && result.length > 0 && (
+                renderResults()
+              )}
+              
             </div>
           </div>
         </dialog>

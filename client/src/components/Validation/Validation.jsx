@@ -44,6 +44,7 @@ function Validation() {
                   setChosenIdentifier("");
                   setResult("");
                   setChosenIdentifier("")
+                  setError("");
                 }}
               >
                 ✕

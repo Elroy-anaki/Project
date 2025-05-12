@@ -8,7 +8,8 @@ import { Table } from "../Table/Table";
 // measurements
 function AddMeasurement() {
   const [measurements, setMeasurements] = useState([]);
-  const { serialNumber, mesToAdd, addMeasurementDetails,setMesToAdd, setAddMeasurementDetails, counterMes, setCounterMes } = useContext(SharedContext);
+  const { serialNumber, mesToAdd, addMeasurementDetails, setMesToAdd, setAddMeasurementDetails, counterMes, setCounterMes } = useContext(SharedContext);
+  const [formKey, setFormKey] = useState(0);
 
   const queryClient = useQueryClient();
 
@@ -19,10 +20,17 @@ function AddMeasurement() {
     }));
   };
 
+  // מאפס את הטופס ואת כל המידע הקשור אליו
+  const resetForm = () => {
+    setMesToAdd([]);
+    setAddMeasurementDetails({});
+    setCounterMes(0);
+    setFormKey(prev => prev + 1);
+  };
+
   const { mutate: addMeasurement } = useMutation({
     mutationKey: ["addMeasurement"],
     mutationFn: async (data) => {
-      console.log("mesToAdd", mesToAdd)
       await axios.post("measurements/", data)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getMeasurements"] }),
@@ -113,10 +121,8 @@ function AddMeasurement() {
             type="button"
             className="absolute top-4 right-4 rounded-xl cursor-pointer px-2 py-1 bg-rose-500 text-white font-bold border-none hover:bg-rose-600 transition"
             onClick={() => {
-              setMesToAdd([])
-              setAddMeasurementDetails({})
-              
-              document.getElementById("add-measurement").close()
+              resetForm();
+              document.getElementById("add-measurement").close();
             }}
           >
             X
@@ -143,18 +149,16 @@ function AddMeasurement() {
                   onSubmit={(e) => {
                     e.preventDefault();
                     // שלב 1: מפה את mesToAdd לשדות הפלט
-                    console.log("mesToAdd", mesToAdd)
-                    let mesToAddParsed;
-                    if (mesToAdd) {
+                    let mesToAddParsed = {};
+                    if (mesToAdd?.length && counterMes < mesToAdd.length) {
                       mesToAddParsed = {
                         input_value: mesToAdd[counterMes]["Nominal torque"]?.value || 0,
-                        output_value: mesToAdd[counterMes]["Applied torque"].value || 0,
-                        deviation: mesToAdd[counterMes]["Permissible deviation"].value || "",
-                        tolerance: mesToAdd[counterMes]["Permissible deviation"].value || "",
-                        uncertainty: mesToAdd[counterMes]["Uncertainty"].value || "",
-                        comments: mesToAdd[counterMes]["comments"].value || "",
-                        threshold: mesToAdd[counterMes]["Permissible deviation"].value || "",
-                        // אפשר להוסיף עוד שדות לפי הצורך
+                        output_value: mesToAdd[counterMes]["Applied torque"]?.value || 0,
+                        deviation: mesToAdd[counterMes]["Permissible deviation"]?.value || "",
+                        tolerance: mesToAdd[counterMes]["Permissible deviation"]?.value || "",
+                        uncertainty: mesToAdd[counterMes]["Uncertainty"]?.value || "",
+                        comments: mesToAdd[counterMes]["comments"]?.value || "",
+                        threshold: mesToAdd[counterMes]["Permissible deviation"]?.value || "",
                       };
                     }
 
@@ -165,18 +169,17 @@ function AddMeasurement() {
                       serial_number: serialNumber,
                     };
 
-                    console.log("fullMeasurement", fullMeasurement);
                     addMeasurement(fullMeasurement);
+
                     if (mesToAdd?.length > counterMes && counterMes !== mesToAdd?.length - 1) {
                       setCounterMes(counterMes + 1);
-                    }
-
-                    if (counterMes === mesToAdd.length - 1) {
-                      document.getElementById("add-measurement").close()
+                    } else {
+                      resetForm();
+                      document.getElementById("add-measurement").close();
                     }
                   }}
                 >
-                  <Form onChange={handelChange} serialNumber={serialNumber} />
+                  <Form key={formKey} onChange={handelChange} serialNumber={serialNumber} formKey={formKey} />
                   <button
                     type="submit"
                     className="btn bg-cyan-700 w-full text-white border-none hover:bg-cyan-800 transition"

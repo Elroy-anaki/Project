@@ -50,7 +50,6 @@ function Dashboard() {
       );
       console.log("Response:", response.data);
       queryClient.invalidateQueries({ queryKey: ["getDevicesCustomers"] });
-      // setSerialNumber(response.data.data.first_page['Serial Number'])
       setSerialNumber(response.data.data.first_page["Serial Number"]);
       document.getElementById("add-measurement").showModal();
       console.log(

@@ -1,26 +1,21 @@
+// תיקון לקובץ Form.js
+// יש להוסיף state לוקאלי לטופס שיתאפס כשהטופס נסגר
+
 import React, { useContext, useState, useEffect } from "react";
 import { Input } from "../ui/Input/Input";
 import { SharedContext } from "../../contexts/sharedContext";
 
 function parseToNumber(value) {
   if (typeof value !== "string") return NaN;
-
-  // הזזת סימן שלילי לסוף
   value = value.trim();
-
-  // אם הסימן השלילי נמצא בסוף המחרוזת (כמו '5.75-')
   if (value.endsWith("-")) {
     value = "-" + value.slice(0, -1);
   }
-
-  // הסרה של תווים לא חוקיים כמו '%' או תווים נוספים
   value = value.replace(/[^0-9.\-]/g, "");
-
   return parseFloat(value);
 }
 
 function validateUnit(value) {
-  // בדיקה שהערך מכיל רק אותיות באנגלית
   const englishRegex = /^[a-zA-Z]+$/;
   return englishRegex.test(value);
 }
@@ -34,7 +29,7 @@ function validateDate(date) {
   return inputDate >= minDate && inputDate <= maxDate;
 }
 
-function Form({ serialNumber, onChange }) {
+function Form({ serialNumber, onChange, formKey }) {
   const {mesToAdd, counterMes} = useContext(SharedContext);
   const [unitErrors, setUnitErrors] = useState({
     unit1: '',
@@ -46,8 +41,36 @@ function Form({ serialNumber, onChange }) {
     input_value: '',
     output_value: '',
     deviation: '',
-    measurement_date: ''
+    measurement_date: '',
+    unit1: '',
+    unit2: '',
+    unit3: '',
+    threshold: '',
+    identifier: '',
+    status: '',
+    comments: '',
+    tolerance: '',
+    uncertainty: ''
   });
+  
+  // איפוס הערכים כשמשתנה ה-formKey
+  useEffect(() => {
+    setFormValues({
+      input_value: '',
+      output_value: '',
+      deviation: '',
+      measurement_date: '',
+      unit1: '',
+      unit2: '',
+      unit3: '',
+      threshold: '',
+      identifier: '',
+      status: '',
+      comments: '',
+      tolerance: '',
+      uncertainty: ''
+    });
+  }, [formKey]);
 
   const handleUnitChange = (e) => {
     const { name, value } = e.target;
@@ -64,6 +87,11 @@ function Form({ serialNumber, onChange }) {
       }));
     }
     
+    setFormValues(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
     onChange(e);
   };
 
@@ -71,7 +99,6 @@ function Form({ serialNumber, onChange }) {
     const { name, value } = e.target;
     
     if (!validateDate(value)) {
-      // אם התאריך לא תקין, נחזיר לערך הקודם
       e.target.value = formValues.measurement_date;
       return;
     }
@@ -91,7 +118,6 @@ function Form({ serialNumber, onChange }) {
       [name]: value
     }));
 
-    // אם זה input או output, נחשב את ה-deviation
     if (name === 'input_value' || name === 'output_value') {
       const input = name === 'input_value' ? parseToNumber(value) : parseToNumber(formValues.input_value);
       const output = name === 'output_value' ? parseToNumber(value) : parseToNumber(formValues.output_value);
@@ -103,7 +129,6 @@ function Form({ serialNumber, onChange }) {
           deviation: deviation.toString()
         }));
         
-        // יצירת אירוע מלאכותי עבור ה-deviation
         const deviationEvent = {
           target: {
             name: 'deviation',
@@ -115,6 +140,14 @@ function Form({ serialNumber, onChange }) {
     }
 
     onChange(e);
+  };
+
+  // שימוש ב-mesToAdd רק אם יש ערכים ו-counterMes תקין
+  const getMesToAddValue = (field, fallback = "") => {
+    if (mesToAdd?.length && counterMes < mesToAdd.length && mesToAdd[counterMes] && mesToAdd[counterMes][field]) {
+      return mesToAdd[counterMes][field].value;
+    }
+    return formValues[fallback] || fallback;
   };
 
   return (
@@ -139,7 +172,7 @@ function Form({ serialNumber, onChange }) {
               id={"input_value"}
               placeholder={"Input"}
               onChange={handleInputChange}
-              value={mesToAdd?.length && mesToAdd[counterMes]["Nominal torque"] ? mesToAdd[counterMes]["Nominal torque"].value : ""}
+              value={getMesToAddValue("Nominal torque") || formValues.input_value}
             />
           </div>
           <div>
@@ -150,7 +183,7 @@ function Form({ serialNumber, onChange }) {
               id={"output_value"}
               placeholder={"Output"}
               onChange={handleInputChange}
-              value={mesToAdd?.length && mesToAdd[counterMes]["Applied torque"] ? mesToAdd[counterMes]["Applied torque"].value : ""}
+              value={getMesToAddValue("Applied torque") || formValues.output_value}
             />
           </div>
           <div>
@@ -160,6 +193,7 @@ function Form({ serialNumber, onChange }) {
               placeholder={"Unit1"}
               type={"text"}
               onChange={handleUnitChange}
+              value={formValues.unit1}
             />
             {unitErrors.unit1 && (
               <p className="text-red-500 text-sm text-right mr-8">{unitErrors.unit1}</p>
@@ -175,7 +209,7 @@ function Form({ serialNumber, onChange }) {
               id={"deviation"}
               placeholder={"Deviation"}
               onChange={onChange}
-              value={mesToAdd?.length && mesToAdd[counterMes]["Deviation"] ? parseToNumber(mesToAdd[counterMes]["Deviation"].value) : formValues.deviation}
+              value={getMesToAddValue("Deviation", "deviation") || formValues.deviation}
               readOnly
             />
           </div>
@@ -186,8 +220,8 @@ function Form({ serialNumber, onChange }) {
               name={"tolerance"}
               id={"tolerance"}
               placeholder={"Tolerance"}
-              onChange={onChange}
-              value={mesToAdd?.length && mesToAdd[counterMes]["Permissible deviation"] ? mesToAdd[counterMes]["Permissible deviation"].value : ""}
+              onChange={handleInputChange}
+              value={getMesToAddValue("Permissible deviation") || formValues.tolerance}
             />
           </div>
           <div>
@@ -197,6 +231,7 @@ function Form({ serialNumber, onChange }) {
               placeholder={"Unit2"}
               type={"text"}
               onChange={handleUnitChange}
+              value={formValues.unit2}
             />
             {unitErrors.unit2 && (
               <p className="text-red-500 text-sm text-right mr-8">{unitErrors.unit2}</p>
@@ -211,8 +246,8 @@ function Form({ serialNumber, onChange }) {
               name={"uncertainty"}
               id={"uncertainty"}
               placeholder={"Uncertainty"}
-              onChange={onChange}
-              value={mesToAdd?.length && mesToAdd[counterMes]["Uncertainty"] ? mesToAdd[counterMes]["Uncertainty"].value : ""}
+              onChange={handleInputChange}
+              value={getMesToAddValue("Uncertainty") || formValues.uncertainty}
             />
           </div>
           <div>
@@ -222,6 +257,7 @@ function Form({ serialNumber, onChange }) {
               placeholder={"Unit3"}
               type={"text"}
               onChange={handleUnitChange}
+              value={formValues.unit3}
             />
             {unitErrors.unit3 && (
               <p className="text-red-500 text-sm text-right mr-8">{unitErrors.unit3}</p>
@@ -234,8 +270,8 @@ function Form({ serialNumber, onChange }) {
               name={"threshold"}
               id={"threshold"}
               placeholder={"Threshold"}
-              onChange={onChange}
-              value={mesToAdd?.length && mesToAdd[counterMes]["Permissible deviation"] ? mesToAdd[counterMes]["Permissible deviation"].value : ""}
+              onChange={handleInputChange}
+              value={getMesToAddValue("Permissible deviation") || formValues.threshold}
             />
           </div>
         </div>
@@ -245,7 +281,8 @@ function Form({ serialNumber, onChange }) {
             name={"identifier"}
             placeholder={"Identifier"}
             type={"text"}
-            onChange={onChange}
+            onChange={handleInputChange}
+            value={formValues.identifier}
           />
         </div>
         <div>
@@ -256,7 +293,8 @@ function Form({ serialNumber, onChange }) {
             name={"status"}
             id={"status"}
             placeholder={"Status"}
-            onChange={onChange}
+            onChange={handleInputChange}
+            value={formValues.status}
           />
         </div>
         <Input
@@ -264,8 +302,8 @@ function Form({ serialNumber, onChange }) {
           name={"comments"}
           placeholder={"Comments"}
           type={"text"}
-          onChange={onChange}
-          value={mesToAdd?.length && mesToAdd[counterMes]["comments"] ? mesToAdd[counterMes]["comments"].value : ""}
+          onChange={handleInputChange}
+          value={getMesToAddValue("comments") || formValues.comments}
         />
       </div>
     </>

@@ -9,14 +9,29 @@ function Uncertainty() {
   const [chosenIdentifier, setChosenIdentifier] = useState("");
   const [chosenDate, setChosenDate] = useState("");
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
   const { mutate: predictUncertaintyBySerialNumber } = useMutation({
     mutationKey: ["predictUncertaintyBySerialNumber"],
     mutationFn: async (query) => {
       const { data } = await axios.post(`/measurements/${serialNumber}/predict-uncertainty`, query);
+      // setResult(data.data);
+      // console.log(data.data);
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      if (data.data === null) {
+        setError("There are no measurements to predict with.");
+        setResult(null);
+        return;
+      }
       setResult(data.data);
-      console.log(data.data);
-      return;
+      setError("");
+    },
+    onError: (e) => {
+      setError("There are no measurements to predict with.");
+      setResult(null);
     },
   });
 
@@ -31,6 +46,7 @@ function Uncertainty() {
             className="absolute top-4 right-4 rounded-full cursor-pointer p-2 bg-rose-500 text-white font-bold hover:bg-rose-600 transition"
             onClick={() => {
               setResult(null)
+              setError(null)
               document.getElementById("uncertainty-modal").close()}}
           >
             ✕
@@ -132,9 +148,15 @@ function Uncertainty() {
             >
               Predict Uncertainty
             </button>
+            {error && (
+              <div className="w-full mt-10 bg-red-100 p-6 rounded-2xl shadow-lg text-red-700">
+                <h2 className="text-2xl font-bold mb-4">Error</h2>
+                <p className="text-lg">{error}</p>
+              </div>
+            )}
 
             {/* Prediction Result */}
-            {result && (
+            {result && !error &&(
               <div className="w-full mt-10 bg-gray-100 p-6 rounded-2xl shadow-lg text-black">
                 <h2 className="text-2xl font-bold mb-4 text-cyan-700">Prediction Results</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left text-lg">

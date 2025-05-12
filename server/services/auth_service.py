@@ -1,3 +1,4 @@
+from typing import Optional
 import bcrypt 
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
@@ -19,7 +20,7 @@ class AuthService:
     async def verify_password(self, user_password: str, hashed_password: str):
         return bcrypt.checkpw(user_password.encode(), hashed_password.encode())
     
-    async def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
+    async def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
